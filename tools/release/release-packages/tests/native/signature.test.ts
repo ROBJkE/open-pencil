@@ -4,14 +4,14 @@ import { assertSignedVersion, signedVersion } from '#release/native/signature'
 
 function minisign(trustedComment: string): string {
   return [
-    'untrusted comment: signature from tauri secret key',
+    'untrusted comment: signature from minisign secret key',
     'RUQB7eR4Dr/AWAAAAA==',
     `trusted comment: ${trustedComment}`,
     'BBBB=='
   ].join('\n')
 }
 
-test('reads the version the Tauri CLI records in the trusted comment', () => {
+test('reads the version recorded in the trusted comment', () => {
   expect(signedVersion(minisign('timestamp:1\tfile:OpenPencil.app.tar.gz\tversion:0.16.0'))).toBe(
     '0.16.0'
   )

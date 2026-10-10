@@ -98,7 +98,7 @@ La colaboración funciona directamente entre participantes mediante WebRTC y no 
 
 ## Escritorio y web
 
-**Escritorio:** Tauri v2, unos 7 MB, para macOS, Windows y Linux, con menús nativos, uso sin conexión y guardado automático.
+**Escritorio:** ventana nativa de Iced para macOS, Windows y Linux. Los menús Archivo, Edición, Vista y Objeto abren y guardan documentos. El editor Vue sigue siendo la aplicación del navegador.
 
 **Web:** [app.openpencil.dev](https://app.openpencil.dev), instalable como PWA y adaptado a pantallas táctiles.
 

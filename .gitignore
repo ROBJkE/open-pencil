@@ -45,7 +45,7 @@ storybook-static/
 .vite/
 .turbo/
 
-# Tauri updater private signing keys
+# Private signing keys
 /desktop/*.key
 !/desktop/*.key.pub
 

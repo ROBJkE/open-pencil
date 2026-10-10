@@ -43,7 +43,7 @@ SceneGraph → NodeChange[] → Kiwi encode → compress (Zstd/deflate)
 
 Export uses <kbd>⌘</kbd><kbd>S</kbd> (Save) and <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd> (Save As) with native OS dialogs on the desktop app. The exported file includes a `thumbnail.png` required by Figma for file preview. OpenPencil uses the first page named exactly `Cover` (case-insensitive), then the first page whose name contains `Cover`. The desktop app also caches this Cover after opening a file so Recent Files can prefer the generated preview without modifying the source `.fig`.
 
-Compression uses Zstd via Tauri Rust command on desktop, with deflate fallback in the browser.
+Compression uses deflate in the browser and in the desktop session host.
 
 ## Kiwi Binary Codec
 
@@ -62,7 +62,7 @@ Figma's schema uses non-contiguous field IDs (e.g. 1, 2, 5, 10 with gaps). The k
 
 ### Compression
 
-`.fig` files use Zstd compression for both the schema and message payloads. Decompression uses the `fzstd` library. For export, Zstd compression is offloaded to a Tauri Rust command on the desktop app (better performance, correct frame headers). In the browser, deflate via `fflate` is used as a fallback.
+`.fig` files use Zstd compression for both the schema and message payloads. Decompression uses the `fzstd` library. Export uses deflate via `fflate` in the browser and in the desktop session host.
 
 ## Supported Formats
 

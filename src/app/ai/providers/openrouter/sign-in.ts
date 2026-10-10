@@ -1,10 +1,4 @@
-import * as v from 'valibot'
-
-import { IS_TAURI } from '@open-pencil/core/constants'
-
 import { createDeferred } from '@/app/runtime/deferred'
-import { openExternalLink } from '@/app/shell/ui'
-import { WEB_APP_ORIGIN } from '@/constants'
 
 import {
   createOpenRouterPKCE,
@@ -18,10 +12,6 @@ import {
 /** Served from `public/`; it relays the redirect to the editor over this channel. */
 export const OPENROUTER_CALLBACK_PATH = '/oauth/openrouter.html'
 export const OPENROUTER_CALLBACK_CHANNEL = 'open-pencil:openrouter-oauth'
-/** Served from `public/` on the web app; it hands the redirect to the desktop app's deep link. */
-export const OPENROUTER_DESKTOP_CALLBACK_PATH = '/oauth/openrouter-desktop.html'
-/** Emitted by the desktop shell for an `openpencil://oauth/<provider>?…` link. */
-const OAUTH_CALLBACK_EVENT = 'oauth-callback'
 const POPUP_NAME = 'open-pencil-openrouter'
 const POPUP_FEATURES = 'popup,width=520,height=720'
 
@@ -35,9 +25,6 @@ export interface OpenRouterSignInOptions {
   /** Prefills the name of the key OpenRouter creates. */
   keyLabel: string
 }
-
-/** What the desktop shell forwards from an `openpencil://oauth/<provider>?…` link. */
-const oauthCallbackSchema = v.object({ provider: v.string(), query: v.string() })
 
 export interface OpenRouterSignIn {
   /** Opens the OpenRouter sign-in page again for the same attempt. */
@@ -127,50 +114,7 @@ function browserSignIn({ signal, keyLabel }: OpenRouterSignInOptions): OpenRoute
   return { reopen, result }
 }
 
-/**
- * Listens for the `openpencil://oauth/openrouter` link the hosted callback page opens; the
- * desktop shell forwards its query as an `oauth-callback` event.
- */
-async function listenForDesktopCallback() {
-  const { listen } = await import('@tauri-apps/api/event')
-  const received = createDeferred<string | null>()
-  const timer = setTimeout(() => received.resolve(null), OPENROUTER_CODE_LIFETIME_MS)
-  const unlisten = await listen<unknown>(OAUTH_CALLBACK_EVENT, (event) => {
-    const callback = v.safeParse(oauthCallbackSchema, event.payload)
-    if (callback.success && callback.output.provider === 'openrouter') {
-      received.resolve(callback.output.query)
-    }
-  })
-  return {
-    query: (signal: AbortSignal) => abortable(received.promise, signal),
-    stop: () => {
-      clearTimeout(timer)
-      unlisten()
-    }
-  }
-}
-
-/** Opens OpenRouter in the system browser, which returns to the app through a deep link. */
-function desktopSignIn({ signal, keyLabel }: OpenRouterSignInOptions): OpenRouterSignIn {
-  let authorizationURL = ''
-  const reopen = () => {
-    if (authorizationURL) void openExternalLink(authorizationURL)
-  }
-  const result = settle(async () => {
-    const [pkce, callback] = await Promise.all([createOpenRouterPKCE(), listenForDesktopCallback()])
-    try {
-      const callbackURL = new URL(OPENROUTER_DESKTOP_CALLBACK_PATH, WEB_APP_ORIGIN).href
-      authorizationURL = openRouterAuthorizationURL(callbackURL, pkce, keyLabel)
-      await openExternalLink(authorizationURL)
-      return await finish(await callback.query(signal), pkce, signal)
-    } finally {
-      callback.stop()
-    }
-  })
-  return { reopen, result }
-}
-
 /** Signs in to OpenRouter with OAuth PKCE and returns a new API key for this app. */
 export function signInWithOpenRouter(options: OpenRouterSignInOptions): OpenRouterSignIn {
-  return IS_TAURI ? desktopSignIn(options) : browserSignIn(options)
+  return browserSignIn(options)
 }

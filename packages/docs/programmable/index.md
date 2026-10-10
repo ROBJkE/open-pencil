@@ -82,7 +82,7 @@ Here `file` is an absolute `https:` URL ending in `.pen` or `.fig` — the web a
 
 The browser fetches the file cross-origin, so the host must allow it: `raw.githubusercontent.com` sends `Access-Control-Allow-Origin: *` and works. The request carries no credentials and refuses to follow redirects, which keeps an `https:` link from being bounced to a plaintext one — a `https://github.com/<owner>/<repo>/raw/...` URL redirects to `raw.githubusercontent.com` and is therefore refused, so link to the raw host directly. `file` and `node` are stripped from the address bar through the router as soon as they are read — before the fetch, and also when the link was refused — so a reload does not re-open the document, and neither a copied URL nor a later in-app navigation carries the link payload. A linked document is capped at 64 MiB: the body is counted as it streams in, not trusted from `Content-Length`, and the request is aborted the moment it goes over, with the link reporting that the file exceeds 64 MiB. A deployment that serves the app under a Content-Security-Policy must allow the linked host in `connect-src`, otherwise the fetch is blocked and the link reports that it could not open the file.
 
-On macOS the scheme belongs to the installed app bundle, so links reach an installed build and not a `tauri dev` process. On Windows and Linux the link arrives through the deep-link plugin, including when the app is not running yet: the link is queued at startup and handled once the editor is ready; on Linux the bundled desktop entry passes the link through `%U`.
+The Iced desktop app does not register the `openpencil://` scheme. Open those links in the browser app, which reads `file` and `node` from the address bar as described above.
 
 ## Why Open?
 

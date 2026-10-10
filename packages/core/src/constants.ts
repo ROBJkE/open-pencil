@@ -5,7 +5,6 @@ import type { Color } from '@open-pencil/scene-graph/primitives'
 import type { SelectionTheme } from '#core/canvas/renderer/types'
 
 export const IS_BROWSER = typeof window !== 'undefined'
-export const IS_TAURI = IS_BROWSER && '__TAURI_INTERNALS__' in window
 
 export const BLACK: Color = { r: 0, g: 0, b: 0, a: 1 }
 export const TRANSPARENT: Color = { r: 0, g: 0, b: 0, a: 0 }

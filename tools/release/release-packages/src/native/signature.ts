@@ -1,8 +1,8 @@
 const TRUSTED_COMMENT = 'trusted comment: '
 
 /**
- * The version a decoded minisign signature was made for. The Tauri CLI writes the trusted
- * comment as tab-separated `key:value` fields, e.g. `timestamp:…\tfile:…\tversion:1.2.3`.
+ * The version a decoded minisign signature was made for. The trusted comment is
+ * tab-separated `key:value` fields, e.g. `timestamp:…\tfile:…\tversion:1.2.3`.
  */
 export function signedVersion(minisign: string): string | null {
   const comment = minisign
@@ -16,7 +16,7 @@ export function signedVersion(minisign: string): string | null {
   return null
 }
 
-/** Updaters with `requireSignedVersion` reject a signature that does not name this version. */
+/** Reject a signature that does not name this version and asset. */
 export function assertSignedVersion(minisign: string, version: string, asset: string): void {
   const signed = signedVersion(minisign)
   if (signed === null) throw new Error(`Signature for ${asset} does not record a version`)

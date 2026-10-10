@@ -61,11 +61,8 @@ test('rejects duplicate filenames instead of treating arrays as sets', () => {
   expect(() => validateTargetManifests(input, identity)).toThrow('Invalid assets')
 })
 
-test('rejects missing updater signatures', () => {
-  const input = manifests().map((manifest) => ({
-    ...manifest,
-    files: manifest.files.filter((file) => !file.name.endsWith('.sig'))
-  }))
+test('rejects a target that omits its binary', () => {
+  const input = manifests().map((manifest) => ({ ...manifest, files: [] }))
 
   expect(() => validateTargetManifests(input, identity)).toThrow('Invalid assets')
 })

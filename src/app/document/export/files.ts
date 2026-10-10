@@ -13,7 +13,6 @@ import type { SceneGraph } from '@open-pencil/scene-graph'
 
 import type { ExportOptions } from '@/app/document/export/types'
 import { pickBrowserSaveFile, supportsFileSystemAccess } from '@/app/document/io/capability'
-import { isTauri } from '@/app/tauri/env'
 
 type ExportData = string | ArrayBuffer | Uint8Array
 
@@ -132,19 +131,6 @@ export function createExportTargetActions(editor: Editor, state: EditorState, io
   return { renderExportImage, getSelectionExportTarget, listSelectionExportFormats }
 }
 
-export async function chooseTauriExportPath(fileName: string, format: string, ext: string) {
-  const { save } = await import('@tauri-apps/plugin-dialog')
-  return save({
-    defaultPath: fileName,
-    filters: [{ name: format, extensions: [ext.slice(1)] }]
-  })
-}
-
-export async function writeTauriExportFile(path: string, data: Uint8Array) {
-  const { writeFile: tauriWrite } = await import('@tauri-apps/plugin-fs')
-  await tauriWrite(path, data)
-}
-
 export async function saveExportedFile(
   data: Uint8Array,
   fileName: string,
@@ -153,13 +139,6 @@ export async function saveExportedFile(
   mime: string,
   downloadBlob: DownloadBlob
 ) {
-  if (isTauri()) {
-    const path = await chooseTauriExportPath(fileName, format, ext)
-    if (!path) return
-    await writeTauriExportFile(path, data)
-    return
-  }
-
   if (supportsFileSystemAccess()) {
     try {
       const handle = await pickBrowserSaveFile({

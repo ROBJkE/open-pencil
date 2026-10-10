@@ -5,7 +5,7 @@ Private tooling lives under `tools/<role>/<domain>/{src,tests}`; Steiger enforce
 | Role        | Contract                                                                                                               | Domains                                                                                               |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `checks/`   | Read the tree and exit non-zero; never write inside the repository except an own baseline behind an explicit `--write` | `architecture`, `lint`, `i18n`, `secret-scan`, `type-shapes`, `docs`, `test-homes`, `package-quality` |
-| `generate/` | Write generated files or artifacts, idempotently                                                                       | `brand`, `demo`, `tauri-menu`, `authoring-reference`, `visual-oracles`                                |
+| `generate/` | Write generated files or artifacts, idempotently                                                                       | `brand`, `demo`, `authoring-reference`, `visual-oracles`                                              |
 | `release/`  | Build, verify, and publish packages and native artifacts                                                               | `package-artifacts`, `release-packages`                                                               |
 | `ci/`       | Consumed by workflows: path classification and gate policy, container images, the review-guidance bot                  | `policy`, `images`, `pr-review-guidance`                                                              |
 | `dev/`      | Test running and benchmarks for humans                                                                                 | `unit-tests`, `navigation-benchmark`, `dev-server`                                                    |
@@ -27,10 +27,10 @@ Private tooling lives under `tools/<role>/<domain>/{src,tests}`; Steiger enforce
 
 ## Releases
 
-- Update versions in the root and publishable package manifests plus `desktop/tauri.conf.json` and `desktop/Cargo.toml`; move `Unreleased` into `## x.y.z — YYYY-MM-DD`; commit `Release vX.Y.Z`; tag and push `vX.Y.Z`.
-- `.github/workflows/build.yml` is the source of truth: `v*` tags (or dispatches for an immutable stable tag) build shared frontend/package outputs once, build signed desktop artifacts in parallel, verify and attest one complete same-run artifact set, publish npm packages, and replace the draft release assets using the exact changelog section. Policy, provenance, and recovery: `tools/release/release-packages/README.md`.
+- Update versions in the root and publishable package manifests plus `desktop/Cargo.toml`; move `Unreleased` into `## x.y.z — YYYY-MM-DD`; commit `Release vX.Y.Z`; tag and push `vX.Y.Z`.
+- `.github/workflows/build.yml` is the source of truth: `v*` tags (or dispatches for an immutable stable tag) build shared frontend/package outputs once, build the Iced desktop binary in parallel, verify and attest one complete same-run artifact set, publish npm packages, and replace the draft release assets using the exact changelog section. Policy, provenance, and recovery: `tools/release/release-packages/README.md`.
 - Public workspace packages are discovered by the package-artifacts catalog. Bun source exports require the complete `src` directory in package contents; Node exports use `dist`. Release preparation must preserve resolution maps. Prepared publish directories receive the root `LICENSE` when a package has none of its own, and every package needs a `README.md` because npm renders it. Publishing uses prepared npm tarballs verified through the shared Node/Bun consumer checks; never publish package directories manually. `test:packages` first runs the packaging guards in `tools/checks/package-quality/src/smoke/guards.ts`: fixture manifests packed with the real `npm pack` that must trip the tarball inspector and the Node/Bun consumer checks before those checks vouch for real packages.
-- Ensure Tauri and Apple signing/notarization secrets are configured. Verify the draft title, body, and artifacts, then publish. Release titles are exactly the tag (`vX.Y.Z`) without a product-name prefix.
+- Verify the draft title, body, and artifacts, then publish. Release titles are exactly the tag (`vX.Y.Z`) without a product-name prefix. Desktop artifacts are unsigned Iced binaries.
 - Homebrew's `openpencil` cask is managed upstream: BrewTestBot proposes bumps and Homebrew merges them. Check the upstream cask PR after publication; do not push to the archived custom tap or add bump automation. Users install the app with `brew install --cask openpencil` and the CLI through npm or Bun.
 
 ## Demo document
@@ -39,4 +39,4 @@ The `/demo` document is built from `tools/generate/demo/src/document/` into the 
 
 ## Brand assets
 
-Canonical artwork lives in `assets/brand/` (main mark and optical micro master; see its README). `tools/generate/brand/` derives web, docs, and native icons with RealFaviconGenerator and Tauri; generated assets are ignored, not committed. Vite and VitePress configs prepare their own targets, and Tauri dev/build hooks prepare native icons.
+Canonical artwork lives in `assets/brand/` (main mark and optical micro master; see its README). `tools/generate/brand/` derives web, docs, and desktop icons with RealFaviconGenerator and sharp; generated assets are ignored, not committed. Vite and VitePress configs prepare their own targets.

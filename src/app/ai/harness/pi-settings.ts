@@ -25,18 +25,5 @@ export function parsePiSettings(text: string): string | null {
  * in there, on the desktop. Null where there is no home folder to look in.
  */
 export async function readPiAccount(): Promise<PiAccount | null> {
-  const [{ homeDir, join }, { exists, readTextFile }] = await Promise.all([
-    import('@tauri-apps/api/path'),
-    import('@tauri-apps/plugin-fs')
-  ])
-  const home = await homeDir().catch(() => '')
-  if (!home) return null
-  const agentDir = await join(home, '.pi', 'agent')
-  // The desktop capability allows reading only settings.json from Pi's folder, and checking
-  // only that auth.json exists.
-  const [settings, signedIn] = await Promise.all([
-    readTextFile(await join(agentDir, 'settings.json')).catch(() => null),
-    exists(await join(agentDir, 'auth.json')).catch(() => false)
-  ])
-  return { agentDir, defaultModel: settings ? parsePiSettings(settings) : null, signedIn }
+  return null
 }

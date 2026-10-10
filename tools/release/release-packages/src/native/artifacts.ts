@@ -10,7 +10,7 @@ export interface ReportedAsset {
   name: string
 }
 
-/** Consume tauri-action's artifactPaths output, never search for plausible build files. */
+/** Consume the paths the desktop build reported, never search for plausible build files. */
 export async function resolveReportedAssets(
   input: unknown,
   expected: readonly DesktopAsset[],
@@ -37,8 +37,6 @@ export async function resolveReportedAssets(
     }
 
     const info = await stat(source)
-    // tauri-action also reports the macOS .app directory. Its signed archive is required below.
-    if (info.isDirectory() && source.endsWith('.app')) continue
     if (!info.isFile()) throw new Error(`Not an artifact file: ${path}`)
 
     const name = wanted.get(basename(source))

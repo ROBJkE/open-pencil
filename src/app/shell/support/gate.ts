@@ -1,32 +1,11 @@
-import { IS_TAURI } from '@open-pencil/core/constants'
-
 import { missingSupportSentinels } from './baseline'
-import { describeEnvironment, type DesktopFacts, type SupportEnvironment } from './detect'
+import { describeEnvironment, type SupportEnvironment } from './detect'
 import { bootFailureNotice, unsupportedNotice } from './guidance'
 import { renderSupportNotice } from './render'
 
-async function desktopFacts(): Promise<DesktopFacts> {
-  try {
-    const [{ platform, version }, { invoke }] = await Promise.all([
-      import('@tauri-apps/plugin-os'),
-      import('@tauri-apps/api/core')
-    ])
-    const webviewVersion = await invoke<string | null>('webview_version').catch(() => null)
-    return {
-      platform: platform(),
-      osVersion: version(),
-      webviewVersion: webviewVersion ?? undefined
-    }
-  } catch (error) {
-    // The notice still helps without native facts; fall back to the user agent.
-    console.warn('[support] desktop facts unavailable', error)
-    return { platform: 'unknown' }
-  }
-}
-
 async function detectEnvironment(): Promise<SupportEnvironment> {
   const facts = { userAgent: navigator.userAgent, maxTouchPoints: navigator.maxTouchPoints }
-  return describeEnvironment(facts, IS_TAURI ? await desktopFacts() : undefined)
+  return describeEnvironment(facts)
 }
 
 /**

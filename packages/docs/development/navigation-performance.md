@@ -156,12 +156,4 @@ Keep large or binary `.fig` fixtures in Git LFS. Synthetic fixture generation mu
 
 ## Native macOS acceptance
 
-Chromium replay does not establish WKWebView or physical trackpad behavior. Before a release with navigation changes:
-
-1. Build a release-mode Tauri application.
-2. Record the same gesture on physical target hardware.
-3. Capture Instruments **Time Profiler** and **Core Animation** traces, including OpenPencil and WebKit processes.
-4. Check input delivery, main-thread/WASM work, GPU/compositor stalls, viewport continuity, and final crisp settlement.
-5. Store the recording, metrics, hardware/macOS metadata, and Instruments trace as release artifacts.
-
-Native automation may add OS-level scroll injection, but it must preserve continuous-scroll and momentum phases before being called trackpad-equivalent. Synthetic composition or DOM wheel events are not native acceptance evidence.
+Chromium replay covers the browser canvas. The Iced desktop window shows a raster preview from the editor session, so a WKWebView or WebKit trace does not describe it. Before a release with navigation changes, record the gesture in the browser app on the target hardware and keep the recording with the hardware and browser version.

@@ -10,11 +10,9 @@ import {
   readBoundedBody
 } from '@/app/document/io/browser'
 import { notificationMessages } from '@/app/i18n/notifications'
-import { rememberRecentFile } from '@/app/recent-files'
 import { toast } from '@/app/shell/ui'
 import { getTabsSnapshot, openFileInNewTab, switchTab } from '@/app/tabs'
 import { findTabByFileIdentity } from '@/app/tabs/open/identity'
-import { isTauri } from '@/app/tauri/env'
 import { IS_BROWSER } from '@/constants'
 
 const io = new IORegistry(BUILTIN_IO_FORMATS)
@@ -111,28 +109,18 @@ export async function openDesignFileBatch<T>(
   }
 }
 
-export async function readTauriDesignFile(path: string): Promise<File> {
-  assertSupportedDesignFile(path)
-  const { readFile } = await import('@tauri-apps/plugin-fs')
-  const bytes = await readFile(path)
-  return new File([bytes], path.split('/').pop() ?? 'file.fig')
-}
-
-export async function chooseTauriOpenPaths(): Promise<string[]> {
-  const { open } = await import('@tauri-apps/plugin-dialog')
-  const paths = await open({
-    filters: [{ name: 'Design file', extensions: READABLE_DOCUMENT_EXTENSIONS }],
-    multiple: true
-  })
-  if (!paths) return []
-  return typeof paths === 'string' ? [paths] : paths
-}
-
 export async function openFileFromPath(path: string) {
-  if (!isTauri()) return
-  const file = await readTauriDesignFile(path)
-  await openFileInNewTab(file, undefined, path)
-  rememberRecentFile(path)
+  let url: URL | null = null
+  try {
+    const parsed = new URL(path)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') url = parsed
+  } catch {
+    url = null
+  }
+  if (!url) {
+    throw new Error(`Open "${path}" with the file picker. The browser cannot reopen a saved path.`)
+  }
+  await openBrowserFileFromURL(url)
 }
 
 /**
@@ -150,12 +138,6 @@ export async function activateTabForPath(path: string): Promise<boolean> {
 }
 
 export async function openFileDialog() {
-  if (isTauri()) {
-    const paths = await chooseTauriOpenPaths()
-    await openDesignFileBatch(paths, (path) => path.split(/[/\\]/).pop() ?? path, openFileFromPath)
-    return
-  }
-
   if (window.showOpenFilePicker) {
     try {
       const handles = await window.showOpenFilePicker({

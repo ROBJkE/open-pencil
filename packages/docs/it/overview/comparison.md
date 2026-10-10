@@ -26,7 +26,7 @@ OpenPencil è circa undici volte più piccolo. La differenza dipende soprattutto
 
 ```text
 ┌─────────────────────────────────┐
-│         Tauri native shell      │
+│         Iced      │
 │  ┌───────────────────────────┐  │
 │  │  Vue 3 + TypeScript       │  │
 │  │  Editor + Kiwi codec      │  │
@@ -134,7 +134,7 @@ Penpot usa Potok. `UpdateEvent` cambia lo stato, `WatchEvent` esegue gli effetti
 | Preparazione | `bun install && bun dev` | Docker Compose, JVM, Node e Rust |
 | Aggiornamento rapido | Vite | shadow-cljs |
 | Tipi | TypeScript rigoroso | Schemi Malli durante l’esecuzione |
-| Desktop | Tauri v2 | Browser |
+| Desktop | Iced | Browser |
 | Tecnologie principali | TypeScript e Vue | Clojure, ClojureScript, Rust e Docker |
 
 ## 9. Prestazioni
@@ -173,7 +173,7 @@ Penpot offre plugin isolati, ma non un’API equivalente per script senza interf
 | Codice | OpenPencil | Circa 26.000 contro 299.000 righe |
 | Compatibilità Figma | OpenPencil | Kiwi e `.fig` nativi |
 | Sviluppo | OpenPencil | TypeScript e Vue anziché Clojure, Rust e Docker |
-| Applicazione desktop | OpenPencil | Tauri nativo |
+| Applicazione desktop | OpenPencil | Iced |
 | Disposizione | OpenPencil | Yoga anziché due implementazioni proprie |
 | Collaborazione | Punti di forza diversi | Penpot: server e accessi; OpenPencil: P2P senza hosting |
 | Installazione autonoma | Penpot | Distribuzione Docker |

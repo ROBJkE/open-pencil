@@ -10,7 +10,7 @@ Place a test with the source that owns its contract. Choose the runtime separate
 | App services and state                  | `tests/app/<path-relative-to-src/app>/**/*.test.ts`            |
 | Cross-package/system integration        | `tests/integration/<contract>/`                                |
 | Application workflows and visuals       | `tests/e2e/<workflow>/**/*.spec.ts`                            |
-| Native WebView and shell delivery       | `tests/e2e/native/**/*.spec.ts`                                |
+| Iced desktop session protocol            | `desktop/` (`cargo test`) and `packages/cli/tests/desktop-session.test.ts` |
 | Figma compatibility acceptance          | `tests/figma/**/*.spec.ts`                                     |
 | Private tool contracts                  | `tools/<owner>/tests/`                                         |
 
@@ -34,7 +34,7 @@ Run `bun --filter @open-pencil/core build` before unit tests. Files under `tests
 - Package integration tests exercise real collaborators owned by that package.
 - Browser integration tests cover browser CSS, WebGL, fonts and DOM behavior where that runtime matters. They need not launch the whole app if the contract can be exercised independently.
 - E2E tests exercise application workflows, accessibility and representative visual integration.
-- Native tests answer whether the real WebView or shell delivers an interaction. A CPU CanvasKit test is not native desktop acceptance; synthetic composition is not real IME acceptance.
+- Desktop protocol tests answer whether the Iced session client and the Bun host agree. A CPU CanvasKit test is not a substitute for the browser canvas.
 - Benchmarks belong to performance tooling and opt-in runs, not ordinary correctness E2E. Bounded assertions about redundant work may accompany a real interaction, but exhaustive cache policy belongs with the owning implementation.
 
 Test observable behavior and contracts, not source text. A test claiming a UI update must observe the UI, not merely read a Set after calling an editor action.
@@ -85,7 +85,7 @@ Current commands:
 | App browser E2E                | `bun run test`               |
 | Storybook browser              | `bun run test:storybook`     |
 | Figma acceptance               | `bun run test:figma`         |
-| Native WebView                 | `bun run test:native`        |
+| Iced desktop                   | `cd desktop && cargo test`   |
 
 During implementation, run the affected unit files or one representative browser scenario. Inspect discovery changes without executing the whole suite when reorganizing files. Use the final CI gate after integration; do not rerun full suites for each edit. Report commands actually run, and distinguish focused coverage from full acceptance.
 

@@ -1,12 +1,12 @@
 # App
 
-Root Tauri/Vite app. Services and state live under `src/app/**`, views under `src/views/**`, UI under `src/components/**` (UI section below). Use `@/` for cross-directory imports. Detect desktop with `IS_TAURI`.
+Root Vite app for the browser. Services and state live under `src/app/**`, views under `src/views/**`, UI under `src/components/**` (UI section below). Use `@/` for cross-directory imports. Detect a browser with `IS_BROWSER`. The desktop GUI is the Iced app in `desktop/`.
 
 ## Editor session
 
 - `src/app/editor/session/create.ts` wraps Core: it creates reactive state, calls `createEditor()`, and assembles document I/O, autosave, export, vector edit, pen resume, flashes, profiler, and mobile clipboard. Tabs live in `src/app/tabs/`; active editor access in `src/app/editor/active-store/`.
 - Use editor actions (`clearSelection()`, `select()`, `setTool()`), never direct state assignments (`packages/core/AGENTS.md`, Editor).
-- File System Access APIs are browser APIs, not Tauri-only. Keep the Safari download fallback and defer `revokeObjectURL`.
+- File System Access APIs are browser APIs. Keep the Safari download fallback and defer `revokeObjectURL`. The Iced desktop app opens and saves documents through its own session, not this module.
 - Vectorize provider clients, preferences, and lazy credential resolution live under `src/app/editor/vectorize/`; conversion itself is in Core.
 
 ## Settings, credentials, storage
@@ -15,14 +15,14 @@ Root Tauri/Vite app. Services and state live under `src/app/**`, views under `sr
 - Persistence outcomes (`saved`, `failed`, `partial`) stay in the domain: preferences and a native credential store cannot transact together. Preserve retryable drafts, reuse already-persisted identities on retries, and surface the partial-save warning. Never render raw credential backend errors or secrets.
 - New explicit settings forms use headless VeeValidate v5 with native Valibot schemas and existing controlled UI components; form state lives in the owning settings domain. VeeValidate owns validation and submission state; domain workflows keep their own pending/lifecycle guards. Saved secrets and replacement-secret drafts stay outside form snapshots and devtools. A credential-store failure does not make the entered key invalid.
 - Credential persistence lives under `src/app/settings/credentials/`. Settings components receive `CredentialManager` and may inspect status, replace, or clear; runtime adapters receive `CredentialResolver` and resolve secrets at operation time. Components must not read saved secrets or keep them in long-lived reactive refs; keep newly entered secrets short-lived. Non-secret provider preferences stay in normal settings storage.
-- Tauri stores secrets in the system credential store through `desktop/src/credentials.rs`; browsers default to WebCrypto-encrypted IndexedDB and may explicitly opt out to session-only memory. Native failures must never silently fall back to browser or plaintext storage. New integration credentials use stable `CredentialRef` values and join the unified Settings surface rather than feature-local key forms.
+- Browsers default to WebCrypto-encrypted IndexedDB and may explicitly opt out to session-only memory. New integration credentials use stable `CredentialRef` values and join the unified Settings surface rather than feature-local key forms.
 - Storage-provider schemas and runtime adapters live under `src/app/integrations/storage/`; non-secret preferences and credential references stay separate. Local-first document caching and outbox synchronization live under `src/app/storage/`. A remote storage binding augments document source state and must not replace local file identity.
 - IndexedDB binary rows are written in the form `binaryStorage()` returns, taken before the transaction opens, and read with `readStoredBinary()`. Chromium caps a single byte array at 127 MiB, and WebKit cannot store Blobs in private contexts (`tests/e2e/storage/binary.webkit.spec.ts`).
 
 ## AI, ACP, automation, collaboration
 
 - `src/app/ai/tools/index.ts` binds Core ToolDefs to the active editor's `FigmaAPI`. The chat and ACP prompt compose the Core authoring reference rather than copying it (`packages/core/AGENTS.md`, Tools).
-- ACP transport lives under `src/app/ai/acp/**`; provider definitions in `packages/core/src/constants.ts`; profiles in `src/app/ai/models/**`. Keep provider connections, reusable profiles, and role assignments separate, and resolve credentials lazily. ACP process changes require checking `desktop/capabilities/**`.
+- ACP transport lives under `src/app/ai/acp/**`; provider definitions in `packages/core/src/constants.ts`; profiles in `src/app/ai/models/**`. Keep provider connections, reusable profiles, and role assignments separate, and resolve credentials lazily. The browser app does not spawn ACP or harness processes.
 - Browser-native WebMCP registration lives under `src/app/automation/webmcp/`, consumes per-tool exposure metadata, and is feature-detected through `document.modelContext`. App completion under `src/app/automation/execution/` loads fonts after commit.
 - Collaboration lives under `src/app/collab/**` on Trystero, Yjs, and awareness; preserve crypto-safe room IDs and peer cleanup.
 - A room is a document: every room tab owns its session (`src/app/collab/rooms.ts`, `session.ts`), joining always opens a new tab, and only Share binds an existing document; the collaboration UI reads the active tab's room through `useCollab()` and publishes cursors through the canvas's own tab (`tests/app/collab/session.test.ts`, `tests/e2e/collab/rooms.spec.ts`).
@@ -34,11 +34,11 @@ Root Tauri/Vite app. Services and state live under `src/app/**`, views under `sr
 
 ## Browser baseline
 
-The supported browser baseline lives in `src/app/shell/support/baseline.ts` and feeds the Vite `build.target`, the startup gate, and the documented system requirements; change all three together, including `desktop/tauri.conf.json` `minimumSystemVersion`. Vite lowers syntax but never polyfills APIs, so two data-driven checks enforce the baseline: the app and browser-shipped packages pin TypeScript `lib` to ES2023 (the last edition those engines implement fully), so newer built-ins fail type-checking, and `compat/compat` (`eslint-plugin-compat` under oxlint, fed the same browsers from `settings.browsers`) rejects Web APIs they lack. Do not raise the lib to `ESNext` in those tsconfigs; use `createDeferred()` from `src/app/runtime/deferred.ts` instead of `Promise.withResolvers()`. Node-only packages (`cli`, `mcp`, `harness`) are exempt from both. `tests/app/shell/support/baseline.test.ts` keeps the tsconfigs and oxlint browsers in step with the baseline. `src/main.ts` must stay a tiny gate that only dynamically imports `src/boot.ts`, so an unsupported engine can still render `src/app/shell/support/` guidance.
+The supported browser baseline lives in `src/app/shell/support/baseline.ts` and feeds the Vite `build.target`, the startup gate, and the documented system requirements; change them together. Vite lowers syntax but never polyfills APIs, so two data-driven checks enforce the baseline: the app and browser-shipped packages pin TypeScript `lib` to ES2023 (the last edition those engines implement fully), so newer built-ins fail type-checking, and `compat/compat` (`eslint-plugin-compat` under oxlint, fed the same browsers from `settings.browsers`) rejects Web APIs they lack. Do not raise the lib to `ESNext` in those tsconfigs; use `createDeferred()` from `src/app/runtime/deferred.ts` instead of `Promise.withResolvers()`. Node-only packages (`cli`, `mcp`, `harness`) are exempt from both. `tests/app/shell/support/baseline.test.ts` keeps the tsconfigs and oxlint browsers in step with the baseline. `src/main.ts` must stay a tiny gate that only dynamically imports `src/boot.ts`, so an unsupported engine can still render `src/app/shell/support/` guidance.
 
 ## Shell
 
-- Browser and native menus share `src/app/shell/menu/schema.ts`; handle IDs in `use.ts` or editor commands, and regenerate `desktop/generated/menu.json` with `bun run generate:tauri-menu`.
+- The browser menu uses `src/app/shell/menu/schema.ts`. The Iced menu is `desktop/src/main.rs` and is not generated from that schema.
 - Motion policy lives in `src/app/shell/motion/`: resolve the persisted System/Off preference and OS reduction once. The root `data-motion` attribute and the Tailwind `motion-safe`/`motion-reduce` variants represent the effective policy, including portalled content. Use the policy-aware Motion adapters rather than repeating preference conditionals in components.
 - Canvas shortcuts stop while a dialog, menu, or listbox is open. A dialog that edits the document listens for undo and redo on its own content with `useDocumentShortcuts`, so keys in menus it portals never reach it; there is one history, the editor's (`src/app/shell/keyboard/document.ts`, `src/components/variables/VariablesDialog.vue`).
 - Keep the app manifest in `vite/pwa.ts`; use `BrandMark` for in-app branding; never symlink web assets to desktop icons (`tools/AGENTS.md`, Brand assets).

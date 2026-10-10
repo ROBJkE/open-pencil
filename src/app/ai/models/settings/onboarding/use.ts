@@ -1,6 +1,5 @@
 import { computed, reactive, ref, watch } from 'vue'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
 
 import { useAgentSetup } from '@/app/ai/agents/setup'
 import { refreshAIProviderStatus } from '@/app/ai/chat/storage'
@@ -49,7 +48,7 @@ interface AIOnboardingOptions {
   agentsAvailable?: boolean
 }
 
-export function useAIOnboarding({ agentsAvailable = IS_TAURI }: AIOnboardingOptions = {}) {
+export function useAIOnboarding({ agentsAvailable = false }: AIOnboardingOptions = {}) {
   const answers = reactive<OnboardingAnswers>(initialAnswers())
   const current = currentOnboardingModels(aiModelSettings.value)
   const configured = [current.design, current.vision, current.review, current.fast].filter(

@@ -9,9 +9,7 @@ import {
 } from '@/app/automation/bridge/target'
 import { resolveBrowserFileURL } from '@/app/document/io/browser'
 import { openBrowserFileFromURL } from '@/app/shell/menu/files'
-import { openFileFromPath } from '@/app/shell/menu/use'
 import { closeTab, createTab, getActiveStore, getTabById } from '@/app/tabs'
-import { isTauri } from '@/app/tauri/env'
 
 const saveArgsSchema = v.object({ path: v.optional(v.string()) })
 
@@ -26,7 +24,6 @@ async function saveWithoutPrompt(store: AutomationTarget['store'], path?: string
   if (!path && !store.hasWritableSource()) {
     throw new Error(`"${name}" has not been saved to a file yet; pass a path to save it`)
   }
-  if (path) await ensureTauriParentDirectory(path)
   // A failed save to a new path leaves the document with the source it had.
   const saved = path ? await store.saveFigFileToPath(path) : await store.saveFigFile()
   if (!saved) throw new Error(`Could not save "${name}"`)
@@ -36,17 +33,6 @@ export async function handleSaveFile(target: AutomationTarget, args: unknown): P
   const { path } = parseToolArgs('save_file', saveArgsSchema, args)
   await saveWithoutPrompt(target.store, path)
   return { ok: true, result: { saved: true } }
-}
-
-export async function ensureTauriParentDirectory(path: string): Promise<void> {
-  if (!isTauri()) return
-  const [{ dirname }, { mkdir }] = await Promise.all([
-    import('@tauri-apps/api/path'),
-    import('@tauri-apps/plugin-fs')
-  ])
-  const dir = await dirname(path)
-  if (dir === path) return
-  await mkdir(dir, { recursive: true })
 }
 
 export async function handleCloseFile(target: AutomationTarget, args: unknown): Promise<unknown> {
@@ -86,13 +72,7 @@ export async function handleNewDocument(
 export async function handleOpenFile(_target: AutomationTarget, args: unknown): Promise<unknown> {
   const path = (args as { path?: string }).path
   if (!path) throw new Error('Missing "path" in args')
-  if (isTauri()) {
-    await openFileFromPath(path)
-  } else {
-    // Same fetch, cap and format check as every other browser open: an automation client
-    // is not more trusted than a link.
-    await openBrowserFileFromURL(resolveBrowserFileURL(path))
-  }
+  await openBrowserFileFromURL(resolveBrowserFileURL(path))
   const target = resolveAutomationTarget(getActiveStore(), undefined)
   return responseWithTarget({ ok: true, result: { opened: true } }, target)
 }

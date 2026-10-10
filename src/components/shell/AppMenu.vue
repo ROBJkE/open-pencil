@@ -42,8 +42,6 @@ import { useScrollOverflow } from '@/components/shell/useScrollOverflow'
 import IconButton from '@/components/ui/button/IconButton.vue'
 import AppShortcutText from '@/components/ui/menu/AppShortcutText.vue'
 import { useMenuUI } from '@/components/ui/menu/menu'
-import { IS_TAURI } from '@/constants'
-
 const store = useEditorStore()
 
 const { rename, editingName, startRename, commitRename } = useDocumentNameRename(store)
@@ -105,7 +103,7 @@ const { overflowStart, overflowEnd, scrollTowardHidden } = useScrollOverflow(men
         <icon-lucide-sidebar class="size-3.5" />
       </IconButton>
     </div>
-    <div v-if="!IS_TAURI" class="flex items-center px-1 pb-1">
+    <div class="flex items-center px-1 pb-1">
       <div
         ref="menubar"
         class="scrollbar-none min-w-0 flex-1 overflow-x-auto data-overflow-end:mask-r-from-[calc(100%-2rem)] data-overflow-start:mask-l-from-[calc(100%-2rem)]"

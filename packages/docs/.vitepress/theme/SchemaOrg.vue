@@ -29,7 +29,7 @@ const schema = JSON.stringify({
     'MCP server for AI coding tools',
     'P2P real-time collaboration',
     'Headless CLI for automation',
-    'Desktop app via Tauri',
+    'Desktop app via Iced',
   ],
 })
 </script>

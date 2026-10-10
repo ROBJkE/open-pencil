@@ -15,7 +15,7 @@
 | **AI/MCP** | MCP SDK + Hono | 90+ tools for AI coding tools, stdio + HTTP transports |
 | **JSX Transform** | Sucrase | Lightweight (201 KB) JSX → JS, synchronous, browser-compatible |
 | **Events** | nanoevents | 108 bytes, typed event emitter for SceneGraph mutations |
-| **Desktop** | Tauri v2 | ~5MB native app (vs Electron's ~100MB), Rust backend |
+| **Desktop** | Iced | Native Rust window; the Vue editor stays the browser app |
 | **Build** | Vite 7 | Fast HMR, native ES modules |
 | **Testing** | Playwright + bun:test | Visual regression (E2E) + fast unit tests |
 | **Linting** | oxlint | Rust-based, orders of magnitude faster than ESLint |
@@ -50,7 +50,7 @@ SVG is slow for complex documents. Every node is a DOM element — 10,000 nodes 
 
 ### Why not Electron (like Figma desktop)?
 
-Tauri v2 uses the system webview (~5MB) instead of bundling Chromium (~100MB). The Rust backend provides native performance for file I/O and system integration.
+The desktop app is an Iced window. It opens and saves documents through a Bun session that drives the TypeScript editor engine, instead of embedding a second browser.
 
 ### Why not React (like the original plan)?
 

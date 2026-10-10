@@ -33,7 +33,7 @@ body:
         - SVG/PDF/raster export
         - CLI
         - MCP / automation
-        - Tauri desktop
+        - Iced desktop
         - Collaboration
         - Documentation
         - Not sure

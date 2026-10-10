@@ -263,10 +263,10 @@ const noAppImportsInPackages = createImportSourceRule({
     source.startsWith('@/') && `Workspace packages must not import app-shell alias '${source}'.`
 })
 
-const frameworkImportPrefixes = ['@vue/', '@tauri-apps/', '@/']
+const frameworkImportPrefixes = ['@vue/', '@/']
 
 const noCoreFrameworkImports = createImportSourceRule({
-  description: 'Keep @open-pencil/core framework-agnostic by disallowing Vue/Tauri/app imports',
+  description: 'Keep @open-pencil/core framework-agnostic by disallowing Vue and app imports',
   applies: (file) => file.includes('/packages/core/src/'),
   check: (source) =>
     (source === 'vue' ||

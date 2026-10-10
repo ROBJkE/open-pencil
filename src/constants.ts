@@ -1,10 +1,9 @@
-import { IS_BROWSER, IS_TAURI } from '@open-pencil/core/constants'
+import { IS_BROWSER } from '@open-pencil/core/constants'
 
 import ACP_DESIGN_CONTEXT from '@/app/ai/acp/design-context.md'
 
 export {
   IS_BROWSER,
-  IS_TAURI,
   SELECTION_COLOR,
   COMPONENT_COLOR,
   SNAP_COLOR,
@@ -88,7 +87,7 @@ export function releaseNotesURL(version: string): string {
 }
 
 export function getShareURL(roomId: string): string {
-  const base = IS_TAURI || !IS_BROWSER ? WEB_APP_ORIGIN : window.location.origin
+  const base = IS_BROWSER ? window.location.origin : WEB_APP_ORIGIN
   return `${base}/share/${roomId}`
 }
 

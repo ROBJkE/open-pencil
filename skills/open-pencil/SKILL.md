@@ -32,7 +32,7 @@ bun add -g @open-pencil/cli
 bun add -g @open-pencil/mcp
 ```
 
-The desktop app starts `openpencil-mcp-http` automatically in production Tauri builds when `@open-pencil/mcp` is installed globally and exposes automation on:
+The browser app can start a local MCP server in development. A server you start yourself exposes automation on:
 
 - HTTP/RPC: `http://127.0.0.1:7600`
 - WebSocket bridge: `ws://127.0.0.1:7601`

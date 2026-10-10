@@ -11,7 +11,6 @@ import {
 import { mcpRuntime } from '@/app/automation/mcp/runtime'
 import { useMCPSettings } from '@/app/automation/mcp/settings/use'
 import { openToolAccessSettings } from '@/app/automation/tool-access/settings/use'
-import { isTauri } from '@/app/tauri/env'
 import SettingsGroup from '@/components/settings/layout/SettingsGroup.vue'
 import SettingsRow from '@/components/settings/layout/SettingsRow.vue'
 import SettingsSection from '@/components/settings/layout/SettingsSection.vue'
@@ -34,7 +33,7 @@ const statusMessage = computed(
       error: automation.value.statusError
     })[mcpRuntime.status]
 )
-const { restart, chooseRootDirectory } = useMCPSettings()
+const { restart } = useMCPSettings()
 </script>
 
 <template>
@@ -85,22 +84,10 @@ const { restart, chooseRootDirectory } = useMCPSettings()
         <p class="text-xs leading-relaxed text-muted">
           {{ automation.rootDirectoryDescription }}
         </p>
-        <div v-if="mcpRootDirectory || isTauri()" class="flex flex-wrap gap-2">
-          <AppButton
-            v-if="mcpRootDirectory"
-            size="xs"
-            variant="outline"
-            @click="mcpRootDirectory = ''"
-            >{{ automation.useDefaultRoot }}</AppButton
-          >
-          <AppButton
-            v-if="isTauri()"
-            size="xs"
-            variant="outline"
-            data-test-id="settings-mcp-root-directory"
-            @click="chooseRootDirectory"
-            >{{ automation.chooseRootDirectory }}</AppButton
-          >
+        <div v-if="mcpRootDirectory" class="flex flex-wrap gap-2">
+          <AppButton size="xs" variant="outline" @click="mcpRootDirectory = ''">{{
+            automation.useDefaultRoot
+          }}</AppButton>
         </div>
       </div>
     </SettingsGroup>

@@ -343,7 +343,7 @@ const noSilentCatch = {
 const noTypeofWindowCheck = {
   meta: {
     docs: {
-      description: 'Disallow raw typeof window checks — use IS_BROWSER or IS_TAURI from constants'
+      description: 'Disallow raw typeof window checks — use IS_BROWSER from constants'
     }
   },
   create(context) {
@@ -361,8 +361,7 @@ const noTypeofWindowCheck = {
         if (isTypeofWindow(node.left) || isTypeofWindow(node.right)) {
           context.report({
             node,
-            message:
-              "Use IS_BROWSER or IS_TAURI from constants instead of raw 'typeof window' checks."
+            message: "Use IS_BROWSER from constants instead of raw 'typeof window' checks."
           })
         }
       }

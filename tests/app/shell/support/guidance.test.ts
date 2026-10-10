@@ -3,7 +3,6 @@ import { describe, expect, test } from 'bun:test'
 import type { SupportEnvironment } from '@/app/shell/support/detect'
 import {
   SYSTEM_REQUIREMENTS_URL,
-  WEBVIEW2_DOWNLOAD_URL,
   bootFailureNotice,
   unsupportedNotice
 } from '@/app/shell/support/guidance'
@@ -27,42 +26,14 @@ function reportLink(notice: ReturnType<typeof unsupportedNotice>): URL {
 }
 
 describe('unsupported engine guidance', () => {
-  test('tells a desktop Mac on a supported macOS to install Software Update', () => {
+  test('tells a desktop host that this page is the browser app', () => {
     const notice = unsupportedNotice(
       environment({ host: 'desktop', os: 'macos', browser: 'safari', osVersion: '13.7.8' }),
       MISSING
     )
-    expect(notice.heading).toBe('Update macOS to run OpenPencil')
-    expect(notice.paragraphs[0]).toContain('macOS 13.7.8')
-    expect(notice.paragraphs[1]).toContain('Software Update')
-    expect(reportLink(notice).searchParams.get('platform')).toBe('macOS (Tauri)')
-  })
-
-  test('tells a desktop Mac below the minimum macOS to upgrade the OS', () => {
-    const notice = unsupportedNotice(
-      environment({ host: 'desktop', os: 'macos', browser: 'safari', osVersion: '12.6.4' }),
-      MISSING
-    )
-    expect(notice.heading).toBe('OpenPencil needs macOS 13 or later')
-  })
-
-  test('names the WebKitGTK package on Linux desktops', () => {
-    const notice = unsupportedNotice(
-      environment({ host: 'desktop', os: 'linux', browser: 'safari', webviewVersion: '2.38.6' }),
-      MISSING
-    )
-    expect(notice.heading).toBe('Update WebKitGTK to run OpenPencil')
-    expect(notice.paragraphs[0]).toContain('2.38.6')
-    expect(notice.paragraphs[1]).toContain('webkit2gtk-4.1')
-  })
-
-  test('links the WebView2 runtime on Windows desktops', () => {
-    const notice = unsupportedNotice(
-      environment({ host: 'desktop', os: 'windows', browser: 'edge', browserVersion: 100 }),
-      MISSING
-    )
-    expect(notice.heading).toBe('Update WebView2 to run OpenPencil')
-    expect(notice.links.map((link) => link.url)).toContain(WEBVIEW2_DOWNLOAD_URL)
+    expect(notice.heading).toBe('This page is the browser app')
+    expect(notice.paragraphs[0]).toContain('native window')
+    expect(reportLink(notice).searchParams.get('platform')).toBe('macOS')
   })
 
   test.each([
@@ -160,7 +131,7 @@ describe('boot failure guidance', () => {
       error
     )
     expect(notice.heading).toBe("OpenPencil couldn't start")
-    expect(notice.paragraphs[1]).toContain('Safari updates')
+    expect(notice.paragraphs[1]).toContain('native window')
     expect(notice.details[0]).toBe('TypeError: Promise.withResolvers is not a function')
     expect(reportLink(notice).searchParams.get('logs')).toContain('OS: macos 13.7.8')
   })

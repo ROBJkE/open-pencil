@@ -23,7 +23,7 @@ brew install --cask openpencil
 
 Or download from the [releases page](https://github.com/open-pencil/open-pencil/releases/latest), or [use the web app](https://app.openpencil.dev) — no install needed.
 
-Requires macOS 13 or later with current Safari updates, Windows 10 or later, or Linux with WebKitGTK 2.40+; the web app needs Chrome 111, Edge 111, Firefox 128, or Safari 16.4 or later. See [system requirements](https://openpencil.dev/getting-started#system-requirements).
+The desktop app is a native window for macOS, Windows, and Linux. The web app needs Chrome 111, Edge 111, Firefox 128, or Safari 16.4 or later. See [system requirements](https://openpencil.dev/getting-started#system-requirements).
 
 ## What it does
 
@@ -38,7 +38,7 @@ Requires macOS 13 or later with current Safari updates, Windows 10 or later, or 
 - **Vue SDK for custom editors** — headless components and composables for embedding OpenPencil into other apps or building workflow-specific editing surfaces. [Read the SDK docs →](https://openpencil.dev/programmable/sdk/)
 - **Real-time collaboration** — P2P via WebRTC, no server, no account. Cursors, presence, follow mode, voice calls
 - **Auto layout & CSS Grid** — flex and grid layout via Yoga WASM, with gap, padding, alignment, track sizing
-- **~15 MB desktop app** — Tauri v2 for macOS, Windows, Linux. Also runs in the browser as a PWA
+- **Native desktop app** — an Iced window for macOS, Windows, and Linux. Also runs in the browser as a PWA
 
 ## CLI
 
@@ -227,10 +227,10 @@ See the [roadmap](https://openpencil.dev/development/roadmap) for product direct
 ```sh
 bun install
 bun run dev:portless  # Web editor at https://open-pencil.localhost
-bun run tauri dev     # Desktop app (requires Rust)
+bun run desktop       # Desktop app (requires Rust and Bun)
 ```
 
-[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, quality gates, pull requests, and commits. [AGENTS.md](AGENTS.md) maps the repository and links the guide inside each package. Desktop builds need [Rust](https://rustup.rs/) and the [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/); run `bun run tauri build`.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, quality gates, pull requests, and commits. [AGENTS.md](AGENTS.md) maps the repository and links the guide inside each package. Desktop builds need [Rust](https://rustup.rs/) 1.88 or later; run `bun run desktop`.
 
 ### Tech stack
 
@@ -241,7 +241,7 @@ bun run tauri dev     # Desktop app (requires Rust)
 | UI            | Vue 3, Reka UI, Tailwind CSS 4                                                    |
 | File format   | Kiwi binary + Zstd + ZIP                                                          |
 | Collaboration | Trystero (WebRTC P2P) + Yjs (CRDT)                                                |
-| Desktop       | Tauri v2                                                                          |
+| Desktop       | Iced                                                                              |
 | AI/MCP        | Vercel AI SDK (multi-provider BYOK), MCP SDK, Hono                                |
 
 ## Acknowledgments

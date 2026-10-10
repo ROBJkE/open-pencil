@@ -7,24 +7,22 @@ For source identity, override evaluation, page sessions, and export contracts, s
 
 ```mermaid
 graph TB
-    subgraph Tauri["Tauri v2 Shell"]
-        subgraph Editor["Editor (Web)"]
-            UI["Vue 3 UI<br/>Toolbar · Panels · Properties<br/>Layers · Color Picker"]
-            Skia["Skia CanvasKit (WASM, 7MB)<br/>Vector rendering · Text shaping<br/>Effects · Export"]
-            subgraph Core["Core Engine (TS)"]
-                SG[SceneGraph] --- Layout[Layout - Yoga]
-                SG --- Selection
-                Undo[Undo/Redo] --- Constraints
-                Constraints --- HitTest[Hit Testing]
-            end
-            subgraph FileFormat["File Format Layer"]
-                FigIO[".fig import/export"] --- Kiwi[Kiwi codec]
-                Kiwi --- SVG[SVG export]
-            end
-        end
-        MCP["MCP Server (90 tools, stdio+HTTP)"]
-        Collab["P2P Collab (Trystero + Yjs)"]
+    subgraph Browser["Browser (Vue)"]
+        UI["Vue 3 UI<br/>Toolbar · Panels · Properties<br/>Layers · Color Picker"]
+        Skia["Skia CanvasKit (WASM)<br/>Vector rendering · Text shaping"]
     end
+    subgraph Desktop["Desktop (Iced)"]
+        Window["Iced window and menus"]
+        Session["Bun session host"]
+    end
+    subgraph Core["Core Engine (TS)"]
+        SG[SceneGraph] --- Layout[Layout - Yoga]
+        SG --- HitTest[Hit Testing]
+        FigIO[".fig import/export"] --- Kiwi[Kiwi codec]
+    end
+    Browser --> Core
+    Session --> Core
+    Window --> Session
 ```
 
 ## Editor Layout

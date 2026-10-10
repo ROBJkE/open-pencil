@@ -10,7 +10,7 @@ import type { GUID } from '@open-pencil/scene-graph/primitives'
 
 import type { SkiaRenderer } from '#core/canvas'
 import { withFigExportRuntime } from '#core/canvas/text/shape'
-import { IS_BROWSER, IS_TAURI } from '#core/constants'
+import { IS_BROWSER } from '#core/constants'
 import {
   exportSchema,
   figExportRecordOptions,
@@ -192,20 +192,6 @@ async function writeFigFile(
   const extras = await figFileExtras(graph, pageId, ck, renderer, renderHeadlessThumbnail)
 
   const version = graph.figKiwiVersion ?? undefined
-
-  if (IS_TAURI) {
-    const { invoke } = await import('@tauri-apps/api/core')
-    return new Uint8Array(
-      await invoke<ArrayBuffer>('build_fig_file', {
-        schemaDeflated: Array.from(schemaDeflated),
-        kiwiData: Array.from(kiwiData),
-        thumbnailPng: Array.from(extras.thumbnailPNG),
-        metaJson: extras.metaJSON,
-        images: extras.images.map((e) => ({ name: e.name, data: Array.from(e.data) })),
-        figKiwiVersion: version
-      })
-    )
-  }
 
   return compressFigData(
     schemaDeflated,

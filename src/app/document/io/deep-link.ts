@@ -10,7 +10,7 @@
 // scope is widened here: the dialog plugin scopes what it returns, and nothing
 // else is ever read from disk.
 import { notificationMessages } from '@/app/i18n/notifications'
-import { activateTabForPath, chooseTauriOpenPaths, openFileFromPath } from '@/app/shell/menu/files'
+import { activateTabForPath, openFileFromPath } from '@/app/shell/menu/files'
 
 export interface DeepLinkTarget {
   path: string
@@ -45,24 +45,24 @@ export async function searchLinkedNode(
   }
 }
 
-/**
- * Whether `candidate` ends with `relative` as whole path segments, decided by the
- * `path_matches_suffix` Tauri command: it canonicalizes the candidate and compares
- * its trailing segments the way the platform's filesystem does. Doing this in JS
- * would either be case-sensitive (and cancel a link whose case differs on macOS or
- * Windows) or lowercase everything (and match the wrong file on Linux).
- */
+/** Whether `candidate` ends with `relative` as whole path segments. */
 export type SuffixMatcher = (candidate: string, relative: string) => Promise<boolean>
 
-const tauriMatchesSuffix: SuffixMatcher = async (candidate, relative) => {
-  const { invoke } = await import('@tauri-apps/api/core')
-  return invoke<boolean>('path_matches_suffix', { candidate, suffix: relative })
+function pathSegments(value: string): string[] {
+  return value.split(/[\\/]/).filter((segment) => segment.length > 0)
+}
+
+const pathMatchesSuffix: SuffixMatcher = async (candidate, relative) => {
+  const left = pathSegments(candidate)
+  const right = pathSegments(relative)
+  if (right.length === 0 || right.length > left.length) return false
+  return right.every((segment, index) => left[left.length - right.length + index] === segment)
 }
 
 export async function resolveDeepLinkFile(
   file: string,
   openPaths: string[],
-  matches: SuffixMatcher = tauriMatchesSuffix
+  matches: SuffixMatcher = pathMatchesSuffix
 ): Promise<string | null> {
   for (const path of openPaths) {
     if (await matches(path, file)) return path
@@ -79,17 +79,17 @@ interface DeepLinkIo {
   matchesSuffix: SuffixMatcher
 }
 
-const tauriIo: DeepLinkIo = {
-  choosePaths: chooseTauriOpenPaths,
+const browserIo: DeepLinkIo = {
+  choosePaths: async () => [],
   openPath: openFileFromPath,
   activateTab: activateTabForPath,
-  matchesSuffix: tauriMatchesSuffix
+  matchesSuffix: pathMatchesSuffix
 }
 
 export async function openDeepLink(
   target: DeepLinkTarget,
   actions: DeepLinkActions,
-  io: DeepLinkIo = tauriIo
+  io: DeepLinkIo = browserIo
 ): Promise<void> {
   const messages = notificationMessages.get()
   const known = await resolveDeepLinkFile(target.path, actions.openPaths(), io.matchesSuffix)

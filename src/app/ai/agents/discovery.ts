@@ -1,11 +1,6 @@
 import { computed, ref, shallowRef } from 'vue'
 
-import {
-  ACP_AGENTS,
-  IS_TAURI,
-  type ACPAgentDef,
-  type ACPAgentID
-} from '@open-pencil/core/constants'
+import { ACP_AGENTS, type ACPAgentDef, type ACPAgentID } from '@open-pencil/core/constants'
 
 import {
   HARNESS_EXECUTABLE,
@@ -218,7 +213,7 @@ export function createAgentDiscovery(options: {
 }
 
 export const agentDiscovery = createAgentDiscovery({
-  enabled: IS_TAURI,
+  enabled: false,
   lookup: lookupAgents,
   install: installAgentAdapter,
   installBridge: installCanvasBridge,

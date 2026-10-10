@@ -321,7 +321,7 @@ describe('close_file and save_file never prompt', () => {
 
   test('a failed save to a path keeps the document source it had', async () => {
     const tab = dirtyTab()
-    // Outside Tauri a path cannot be written, so the save fails.
+    // The browser cannot write an arbitrary path, so the save fails.
     await expect(
       request('save_file', { document_id: tab.id, path: '/tmp/never-written.fig' })
     ).rejects.toThrow('Could not save')

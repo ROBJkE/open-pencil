@@ -8,10 +8,7 @@ import { isDesignClipboardHTML } from '@/app/editor/clipboard/html'
 import { getInMemoryClipboardHTML } from '@/app/editor/clipboard/memory'
 import { pasteClipboardHTML, pastePoint, pasteSVGText } from '@/app/editor/clipboard/paste'
 import { browserSystemClipboard } from '@/app/editor/clipboard/system/browser'
-import { tauriSystemClipboard } from '@/app/editor/clipboard/system/tauri'
-import type { SystemClipboard } from '@/app/editor/clipboard/system/types'
 import { hasDocumentTextSelection, isEditing } from '@/app/shell/keyboard/focus'
-import { isTauri } from '@/app/tauri/env'
 
 function cursorPosition(store: EditorStore) {
   const { cursorCanvasX: ccx, cursorCanvasY: ccy } = store.state
@@ -44,24 +41,12 @@ export function bindEditorClipboard(store: EditorStore) {
   useEventListener(window, 'copy', (e: ClipboardEvent) => {
     if (isEditing(e) || hasDocumentTextSelection()) return
     e.preventDefault()
-    if (isTauri()) {
-      void tauriSystemClipboard.copy(store)
-      return
-    }
     void browserSystemClipboard.copy(store)
   })
 
   useEventListener(window, 'cut', (e: ClipboardEvent) => {
     if (isEditing(e)) return
     e.preventDefault()
-    if (isTauri()) {
-      const selectedIds = new Set(store.state.selectedIds)
-      void tauriSystemClipboard.copy(store).then((copied) => {
-        if (copied && selectionMatches(store, selectedIds)) store.deleteSelected()
-        return undefined
-      })
-      return
-    }
     void copyAndDeleteSelection(store)
   })
 
@@ -93,11 +78,6 @@ export function bindEditorClipboard(store: EditorStore) {
 
     if (html) {
       void pasteClipboardHTML(store, html)
-      return
-    }
-
-    if (isTauri()) {
-      void tauriSystemClipboard.paste(store, undefined)
       return
     }
 

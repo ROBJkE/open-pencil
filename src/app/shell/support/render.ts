@@ -1,5 +1,3 @@
-import { IS_TAURI } from '@open-pencil/core/constants'
-
 import type { SupportNotice } from './guidance'
 
 /**
@@ -9,20 +7,12 @@ import type { SupportNotice } from './guidance'
 const APP_ROOT_SELECTOR = '#app'
 export const BOOT_NOTICE_ID = 'boot-notice'
 
-function openExternally(event: MouseEvent, href: string): void {
-  // The desktop WebView must not navigate away from the app; hand links to the OS.
-  if (!IS_TAURI) return
-  event.preventDefault()
-  void import('@tauri-apps/plugin-opener').then(({ openUrl }) => openUrl(href))
-}
-
 function createLink(doc: Document, label: string, href: string): HTMLAnchorElement {
   const anchor = doc.createElement('a')
   anchor.href = href
   anchor.target = '_blank'
   anchor.rel = 'noreferrer'
   anchor.textContent = label
-  anchor.addEventListener('click', (event) => openExternally(event, href))
   return anchor
 }
 

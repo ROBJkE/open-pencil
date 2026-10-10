@@ -12,21 +12,21 @@ Pre-built binaries for macOS, Windows, and Linux are available on the [releases 
 
 | Platform | Download |
 | --------------------- | -------------------- |
-| macOS (Apple Silicon) | `.dmg` (aarch64) |
-| macOS (Intel) | `.dmg` (x64) |
-| Windows (x64) | `.msi` / `.exe` |
-| Windows (ARM) | `.msi` / `.exe` |
-| Linux (x64) | `.AppImage` / `.deb` |
+| macOS (Apple Silicon) | `OpenPencil` |
+| macOS (Intel) | `OpenPencil` |
+| Windows (x64) | `OpenPencil.exe` |
+| Windows (ARM) | `OpenPencil.exe` |
+| Linux (x64) | `OpenPencil` |
 
 ## System Requirements
 
-OpenPencil renders with CanvasKit on WebGL and relies on current web platform features, so it needs a recent browser engine. The web app supports Chrome 111, Edge 111, Firefox 128, and Safari 16.4 or later; Chromium-based browsers such as Brave and Opera follow their Chrome version. The desktop app renders in the system WebView, so its floor is the operating system's engine:
+The web app renders with CanvasKit on WebGL and needs Chrome 111, Edge 111, Firefox 128, or Safari 16.4 or later; Chromium-based browsers such as Brave and Opera follow their Chrome version. The desktop app is a native Iced window:
 
 | Platform | Requirement |
 | -------- | ----------- |
-| macOS | macOS 13 Ventura or later with the current Safari updates installed (Safari 16.4 shipped with macOS 13.3). |
-| Windows | Windows 10 or later with the Microsoft Edge WebView2 Evergreen runtime, which updates itself. |
-| Linux | WebKitGTK 2.40 or later (`webkit2gtk-4.1`). |
+| macOS | A current macOS release. |
+| Windows | Windows 10 or later. |
+| Linux | GTK 3 for file dialogs, plus libxkbcommon, Wayland, and Vulkan to build. |
 
 When the engine is too old, OpenPencil shows what to update instead of a blank window. If you see that notice on a system that meets the requirements, use its "Report a problem" link, which prefills the browser and engine details.
 
@@ -84,49 +84,34 @@ Opens the editor at `http://localhost:1420`.
 | `bun run docs:build` | Build documentation locally (fast validation build) |
 | `bun run docs:build:production` | Build deployable documentation, including LLM files |
 
-## Desktop App (Tauri)
+## Desktop App (Iced)
 
-The desktop app requires Rust and platform-specific prerequisites.
-
-### macOS
+The desktop window is a native [Iced](https://iced.rs/) app. It needs Rust 1.88 or later and [Bun](https://bun.sh). From a repository checkout, install dependencies and build the packages, then start the window. The editor session is a Bun process that drives `@open-pencil/core`.
 
 ```sh
-xcode-select --install
-cargo install tauri-cli --version "^2"
-bun run tauri dev
+bun install
+bun run build:packages
+bun run desktop
 ```
 
 ### Windows
 
-1. Install [Rust](https://rustup.rs/) with `stable-msvc` toolchain:
-   ```sh
-   rustup default stable-msvc
-   ```
-2. Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++" workload
-3. WebView2 is pre-installed on Windows 10 (1803+) and Windows 11
-4. Run:
-   ```sh
-   bun run tauri dev
-   ```
+Install [Rust](https://rustup.rs/) with the `stable-msvc` toolchain and [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the "Desktop development with C++" workload, then run `bun run desktop`.
 
 ### Linux
 
 Install system dependencies (Debian/Ubuntu):
 
 ```sh
-sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file \
-  libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+sudo apt install pkg-config libxkbcommon-dev libwayland-dev libvulkan-dev libgtk-3-dev libssl-dev
 ```
 
-Then:
+File dialogs also need GTK or an XDG desktop portal. Then run `bun run desktop`.
+
+### Build for distribution
 
 ```sh
-bun run tauri dev
+cd desktop && cargo build --release
 ```
 
-### Build for Distribution
-
-```sh
-bun run tauri build                                    # Current platform
-bun run tauri build --target universal-apple-darwin    # macOS universal
-```
+The binary is `desktop/target/release/OpenPencil` (`OpenPencil.exe` on Windows). It still starts the editor session with Bun from this repository unless `OPENPENCIL_SESSION_HOST` points at `packages/cli/src/desktop-session/serve.ts`.

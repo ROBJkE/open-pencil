@@ -93,7 +93,7 @@ export async function clearDownloadedFontCache(): Promise<void> {
   await removeCachePrefix(CACHE_DIR)
 }
 
-export function createTauriDownloadedFontCache(): DownloadedFontCache {
+export function createDownloadedFontCache(): DownloadedFontCache {
   return {
     async read(family, style, characters) {
       const manifest = await readManifest()

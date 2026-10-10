@@ -2,7 +2,6 @@ import { useEventListener } from '@vueuse/core'
 import { ref } from 'vue'
 
 import { recordRuntimeError } from '@/app/diagnostics'
-import { isTauri } from '@/app/tauri/env'
 import type { ProgressAmount } from '@/components/ui/feedback/progress'
 import type { ToastVariant } from '@/components/ui/feedback/toast'
 
@@ -159,12 +158,7 @@ export const toast = {
 }
 
 export async function openExternalLink(url: string) {
-  if (isTauri()) {
-    const { openUrl } = await import('@tauri-apps/plugin-opener')
-    await openUrl(url)
-  } else {
-    window.open(url, '_blank')
-  }
+  window.open(url, '_blank')
 }
 export function initials(name: string): string {
   return (
@@ -175,8 +169,4 @@ export function initials(name: string): string {
       .toUpperCase()
       .slice(0, 2) || '?'
   )
-}
-export function decodeTauriStderr(raw: Uint8Array | number[] | string): string {
-  if (typeof raw === 'string') return raw
-  return new TextDecoder().decode(raw instanceof Uint8Array ? raw : new Uint8Array(raw))
 }

@@ -1,9 +1,6 @@
 import { fromUint8Array } from 'js-base64'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
-
 import { readBoundedBody } from '@/app/document/io/browser'
-import { tauriFetch } from '@/app/tauri/http'
 
 import {
   VectorizeAuthError,
@@ -14,7 +11,6 @@ import {
 } from './types'
 
 const REQUEST_TIMEOUT_MS = 30_000
-const NATIVE_TIMEOUT_GRACE_MS = 1000
 const MAX_SVG_BYTES = 20 * 1024 * 1024
 const MAX_API_RESPONSE_BYTES = 1024 * 1024
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
@@ -38,23 +34,12 @@ export const VECTORIZE_PROVIDER_DEFINITIONS: readonly VectorizeProviderDefinitio
   FAL_DEFINITION
 ]
 
-async function vectorizeFetch(
-  input: string,
-  init?: RequestInit,
-  maxResponseBytes = MAX_API_RESPONSE_BYTES
-): Promise<Response> {
+async function vectorizeFetch(input: string, init?: RequestInit): Promise<Response> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
   try {
     const requestInit = { ...init, signal: controller.signal }
-    return await (IS_TAURI
-      ? tauriFetch(
-          input,
-          requestInit,
-          maxResponseBytes,
-          REQUEST_TIMEOUT_MS + NATIVE_TIMEOUT_GRACE_MS
-        )
-      : fetch(input, requestInit))
+    return await fetch(input, requestInit)
   } catch (error) {
     if (controller.signal.aborted) throw new VectorizeTimeoutError()
     throw error

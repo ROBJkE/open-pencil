@@ -1,6 +1,6 @@
 # OpenPencil
 
-Vue 3 + CanvasKit (Skia WASM) + Yoga WASM design editor. Tauri v2 desktop, also runs in browser. Bun workspace monorepo.
+Vue 3 + CanvasKit (Skia WASM) + Yoga WASM design editor. Iced desktop, also runs in the browser. Bun workspace monorepo.
 
 This file holds the repository map and the rules that apply everywhere. Rules for one folder live in that folder's `AGENTS.md`. **Before changing files under a mapped path, read this file and that path's guide.** Paths in every guide are repository-relative. Process for humans (setup, PRs, commits) is in `CONTRIBUTING.md`; product direction and Figma gaps are in `packages/docs/development/roadmap.md`.
 
@@ -21,8 +21,8 @@ This file holds the repository map and the rules that apply everywhere. Rules fo
 | `packages/mcp`         | stdio and Hono HTTP MCP server reusing Core tools                                                                                                                                                 | `packages/mcp/AGENTS.md`          |
 | `packages/harness`     | Optional Node companion for HarnessAgent sessions                                                                                                                                                 | `packages/harness/AGENTS.md`      |
 | `packages/docs`        | Published VitePress site                                                                                                                                                                          | `packages/docs/AGENTS.md`         |
-| `src`                  | Tauri/Vite app: services and state in `src/app/**`, views in `src/views/**`, UI in `src/components/**`                                                                                            | `src/AGENTS.md`                   |
-| `desktop`              | Tauri v2 shell, capabilities, native credentials, menus                                                                                                                                           | `desktop/AGENTS.md`               |
+| `src`                  | Vite app: services and state in `src/app/**`, views in `src/views/**`, UI in `src/components/**`                                                                                                  | `src/AGENTS.md`                   |
+| `desktop`              | Iced desktop window, menus, and the editor session client                                                                                                                                         | `desktop/AGENTS.md`               |
 | `tests`                | Central app, integration, E2E, native, and Figma acceptance tests                                                                                                                                 | `tests/AGENTS.md`                 |
 | `tools`, `.github`     | Private repo tooling, CI classification, releases, brand generation                                                                                                                               | `tools/AGENTS.md`                 |
 | `skills/open-pencil`   | Installable agent skill                                                                                                                                                                           | `packages/core/AGENTS.md` (Tools) |
@@ -31,8 +31,8 @@ This file holds the repository map and the rules that apply everywhere. Rules fo
 ## Commands
 
 - `bun run dev:portless` — preferred browser server at `https://open-pencil.localhost`; worktrees get `https://<branch>.open-pencil.localhost` and a sibling `mcp.open-pencil` URL with isolated runtime discovery.
-- `bun run dev` — fixed `http://localhost:1420`; use only for Playwright, Tauri, and Dev Containers.
-- `bun run tauri dev` — desktop app with hot reload.
+- `bun run dev` — fixed `http://localhost:1420`; use only for Playwright and Dev Containers.
+- `bun run desktop` — Iced desktop app. Needs Rust 1.88 or later and a built checkout (`bun run build:packages`).
 - A fresh worktree needs `bun install` and `bun run build:packages` before docs, Storybook, or any workflow that resolves workspace subpath exports; without the package builds those resolve to missing `packages/*/dist` targets.
 - `bun run check` — complete build, lint, type, architecture, docs, package, dependency, security, tooling, and duplication gate.
 - `bun run format` — format and sort imports.
@@ -62,9 +62,9 @@ Before a PR run `bun run check`, `bun run format`, `bun run test:unit`, and `bun
 - Parse JSON from outside the process (clipboard, files, network, storage, tool arguments) with `v.safeParse(v.pipe(v.string(), v.parseJson(), Schema), text)`, so malformed JSON and a wrong shape fail the same way. Never assert a type on a `JSON.parse` or `.json()` result other than `unknown`; `open-pencil/no-unvalidated-json-parse` enforces this in source, tests, and tooling.
 - Browser-shipped code targets the supported browser baseline in `src/app/shell/support/baseline.ts`: TypeScript `lib` stays ES2023 and `compat/compat` rejects missing Web APIs; Node-only packages (`cli`, `mcp`, `harness`) are exempt. Details in `src/AGENTS.md` (Browser baseline).
 - Components must not hold module-level mutable state. Name repeated or cross-feature constants; app-wide values belong in `src/constants.ts`.
-- Window API augmentations belong to the owning compilation boundary: `src/global.d.ts` for the app, the package's `global.d.ts` for package DOM gaps, `tests/helpers/tauri/native-global.d.ts` for native tests. Never put `declare global` in specs or implementation modules; include canonical declarations through tsconfig. Keep app API contracts named and owned by their implementation domain; derive vendor API types from top-level type imports. Optional runtime globals stay optional and need a runtime guard.
+- Window API augmentations belong to the owning compilation boundary: `src/global.d.ts` for the app and the package's `global.d.ts` for package DOM gaps. Never put `declare global` in specs or implementation modules; include canonical declarations through tsconfig. Keep app API contracts named and owned by their implementation domain; derive vendor API types from top-level type imports. Optional runtime globals stay optional and need a runtime guard.
 - Use `structuredClone` or typed copy helpers for nested mutable data. Self-review for duplication, named shared types, precise unions, and files approaching ~600 lines.
-- Detect desktop with `IS_TAURI`, never ad-hoc `__TAURI_INTERNALS__` checks.
+- The browser app detects a browser with `IS_BROWSER`. The desktop GUI is the Iced binary in `desktop/`, not a flag inside the Vue app.
 
 ### Dependency documentation
 
@@ -75,7 +75,7 @@ Before using an unfamiliar dependency API or writing a replacement, inspect exis
 | Vue                          | https://vuejs.org/llms.txt                                                                     |
 | VueUse                       | https://vueuse.org/guide/ — follow individual composable documentation.                        |
 | Reka UI                      | https://reka-ui.com/llms.txt                                                                   |
-| Tauri v2                     | https://v2.tauri.app/llms.txt                                                                  |
+| Iced                         | https://docs.rs/iced/latest/iced/                                                              |
 | Tailwind CSS                 | https://tailwindcss.com/docs                                                                   |
 | Tailwind Variants            | https://www.tailwind-variants.org/llms.txt                                                     |
 | Motion (use the Vue section) | https://motion.dev/llms.txt                                                                    |

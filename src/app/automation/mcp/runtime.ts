@@ -2,7 +2,6 @@ import { reactive } from 'vue'
 
 import { connectAutomation } from '@/app/automation/bridge/server'
 import type { EditorStore } from '@/app/editor/active-store'
-import { isTauri } from '@/app/tauri/env'
 
 import { mcpFailure, type MCPFailure } from './failure'
 import { setMCPToolDescriptors } from './preferences'
@@ -208,7 +207,7 @@ export function createMCPRuntimeService(dependencies: MCPRuntimeDependencies) {
 
 const appMCPRuntime = createMCPRuntimeService({
   connect: (getStore, authToken) => connectAutomation(getStore, authToken).disconnect,
-  canConnect: () => import.meta.env.DEV || isTauri(),
+  canConnect: () => import.meta.env.DEV,
   readHealth: readAutomationHealth,
   setToolDescriptors: setMCPToolDescriptors,
   spawn: spawnMCPIfNeeded,

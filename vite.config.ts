@@ -60,10 +60,8 @@ export default defineConfig(async ({ command }) => {
       target: viteBuildTarget(),
       chunkSizeWarningLimit: 2500,
       rolldownOptions: {
-        // The desktop Software Update window is its own page.
         input: {
-          main: resolve(__dirname, 'index.html'),
-          updater: resolve(__dirname, 'updater.html')
+          main: resolve(__dirname, 'index.html')
         }
       }
     },

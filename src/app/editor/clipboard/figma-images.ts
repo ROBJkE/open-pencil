@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import { tauriFetch } from '@/app/tauri/http'
-
 type ClipboardImageFetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
 
 type FigmaImageURLs = Record<string, string>
@@ -37,7 +35,7 @@ async function sha1Hex(bytes: Uint8Array): Promise<string> {
 export async function resolveFigmaClipboardImages(
   fileKey: string,
   hashes: string[],
-  fetcher: ClipboardImageFetch = tauriFetch,
+  fetcher: ClipboardImageFetch = fetch,
   timeoutMs = IMAGE_FETCH_TIMEOUT_MS
 ): Promise<ReadonlyMap<string, Uint8Array>> {
   const uniqueHashes = [...new Set(hashes)]

@@ -98,7 +98,7 @@ La collaboration fonctionne directement entre participants via WebRTC et ne néc
 
 ## Bureau et Web
 
-**Bureau :** Tauri v2, environ 7 Mo, pour macOS, Windows et Linux, avec menus natifs, fonctionnement hors ligne et enregistrement automatique.
+**Bureau :** fenêtre native Iced pour macOS, Windows et Linux. Les menus Fichier, Édition, Affichage et Objet ouvrent et enregistrent les documents. L’éditeur Vue reste l’application navigateur.
 
 **Web :** [app.openpencil.dev](https://app.openpencil.dev), installable comme PWA et adapté aux écrans tactiles.
 

@@ -96,7 +96,7 @@ La connessione peer-to-peer WebRTC non richiede un server centrale. Condividi un
 
 ## Desktop e Web
 
-**Desktop:** Tauri v2, circa 7 MB, per macOS, Windows e Linux, con menu nativi, uso senza rete e salvataggio automatico.
+**Desktop:** finestra nativa Iced per macOS, Windows e Linux. I menu File, Edit, View e Object aprono e salvano i documenti. L’editor Vue resta l’app nel browser.
 
 **Web:** [app.openpencil.dev](https://app.openpencil.dev), installabile come PWA e adattato agli schermi touch.
 

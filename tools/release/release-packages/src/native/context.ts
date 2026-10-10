@@ -31,8 +31,7 @@ export function desktopReleasePaths(root: string) {
     nativeArtifacts: join(absoluteRoot, 'native-artifacts'),
     output: join(absoluteRoot, 'release-output'),
     packages: packageReleasePaths(absoluteRoot).artifacts,
-    notes: join(absoluteRoot, 'release-notes.md'),
-    tauriConfig: join(absoluteRoot, 'desktop', 'tauri.conf.json')
+    notes: join(absoluteRoot, 'release-notes.md')
   }
 }
 

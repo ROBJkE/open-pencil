@@ -4,15 +4,15 @@ export type BrowserFamily = 'chrome' | 'edge' | 'opera' | 'firefox' | 'safari' |
 export type OperatingSystem = 'macos' | 'ios' | 'windows' | 'linux' | 'android' | 'unknown'
 
 export interface SupportEnvironment {
-  /** Whether the page runs inside the Tauri desktop shell or a browser tab. */
+  /** Whether facts describe a native desktop shell or a browser tab. */
   readonly host: 'desktop' | 'browser'
   readonly os: OperatingSystem
-  /** Operating system version, known only on desktop through the OS plugin. */
+  /** Operating system version, when a caller supplies desktop facts. */
   readonly osVersion?: string
   readonly browser: BrowserFamily
   /** Major version, with the minor kept for Safari (`16.4`), when the UA names it. */
   readonly browserVersion?: number
-  /** Native WebView engine version reported by Tauri, when available. */
+  /** Engine version supplied with desktop facts, when a caller has one. */
   readonly webviewVersion?: string
   readonly userAgent: string
 }

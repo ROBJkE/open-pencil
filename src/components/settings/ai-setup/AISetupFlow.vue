@@ -2,7 +2,6 @@
 import { tv } from 'tailwind-variants'
 import { computed, ref } from 'vue'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
 import { useI18n } from '@open-pencil/vue'
 
 import type { AISetupEntry } from '@/app/ai/models/settings/onboarding/dialog'
@@ -20,7 +19,7 @@ import AISetupConnection from './AISetupConnection.vue'
 import AISetupReview from './AISetupReview.vue'
 import AISetupRoles from './AISetupRoles.vue'
 
-const { entry, agentsAvailable = IS_TAURI } = defineProps<{
+const { entry, agentsAvailable = false } = defineProps<{
   entry: AISetupEntry
   agentsAvailable?: boolean
 }>()

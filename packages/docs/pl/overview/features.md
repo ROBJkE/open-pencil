@@ -96,7 +96,7 @@ Połączenie równorzędne WebRTC nie wymaga centralnego serwera. Udostępnij od
 
 ## Wersja komputerowa i internetowa
 
-**Komputer:** Tauri v2, około 7 MB, dla macOS, Windows i Linux, z menu systemowymi, pracą bez sieci i automatycznym zapisem.
+**Komputer:** natywne okno Iced dla macOS, Windows i Linux. Menu Plik, Edycja, Widok i Obiekt otwierają i zapisują dokumenty. Edytor Vue zostaje aplikacją w przeglądarce.
 
 **Internet:** [app.openpencil.dev](https://app.openpencil.dev), możliwość instalacji jako PWA i interfejs dotykowy.
 

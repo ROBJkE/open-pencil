@@ -51,8 +51,6 @@ const noMixedCaseAcronymIdentifiers = {
     const ignoredImports = new Set([
       '@agentclientprotocol/sdk',
       '@realfavicongenerator/generate-favicon',
-      '@tauri-apps/plugin-clipboard-manager',
-      '@tauri-apps/plugin-opener',
       '@vueuse/core',
       'culori',
       'reka-ui'

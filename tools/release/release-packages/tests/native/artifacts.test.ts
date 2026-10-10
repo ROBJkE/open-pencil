@@ -28,30 +28,22 @@ async function withArtifacts(run: (root: string, reported: string[]) => Promise<
   }
 }
 
-test('uses reported paths and retains the stable macOS archive name', () =>
+test('uses the reported desktop binary', () =>
   withArtifacts(async (root, reported) => {
-    const app = join(root, 'OpenPencil.app')
-    await mkdir(app)
     await writeFile(join(root, 'unrelated-file.dmg'), 'not reported')
 
-    const assets = await resolveReportedAssets([...reported, app], expected, root)
+    const assets = await resolveReportedAssets(reported, expected, root)
 
-    expect(assets.map((asset) => asset.name).sort()).toEqual([
-      'OpenPencil_0.15.0_aarch64.dmg',
-      'OpenPencil_aarch64.app.tar.gz',
-      'OpenPencil_aarch64.app.tar.gz.sig'
-    ])
+    expect(assets.map((asset) => asset.name).sort()).toEqual(
+      expected.map((asset) => asset.name).sort()
+    )
   }))
 
-test('does not discover an existing signature missing from the action output', () =>
-  withArtifacts(async (root, reported) => {
-    await expect(
-      resolveReportedAssets(
-        reported.filter((path) => !path.endsWith('.sig')),
-        expected,
-        root
-      )
-    ).rejects.toThrow('Missing reported artifacts')
+test('does not discover an existing file missing from the reported output', () =>
+  withArtifacts(async (root) => {
+    await expect(resolveReportedAssets([], expected, root)).rejects.toThrow(
+      'Missing reported artifacts'
+    )
   }))
 
 test('rejects duplicate reports', () =>

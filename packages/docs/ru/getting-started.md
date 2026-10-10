@@ -12,21 +12,21 @@ OpenPencil работает прямо в браузере и не требуе�
 
 | Платформа | Файл |
 | --------------------- | -------------------- |
-| macOS (Apple Silicon) | `.dmg` (aarch64) |
-| macOS (Intel) | `.dmg` (x64) |
-| Windows (x64) | `.msi` / `.exe` |
-| Windows (ARM) | `.msi` / `.exe` |
-| Linux (x64) | `.AppImage` / `.deb` |
+| macOS (Apple Silicon) | `OpenPencil` |
+| macOS (Intel) | `OpenPencil` |
+| Windows (x64) | `OpenPencil.exe` |
+| Windows (ARM) | `OpenPencil.exe` |
+| Linux (x64) | `OpenPencil` |
 
 ## Системные требования
 
-OpenPencil отрисовывает графику через CanvasKit на WebGL и использует современные возможности веб-платформы, поэтому нужен свежий движок браузера. Веб-версия работает в Chrome 111, Edge 111, Firefox 128 и Safari 16.4 или новее; браузеры на основе Chromium, например Brave и Opera, ориентируются на версию своего Chrome. Приложение для компьютера отрисовывает интерфейс в системном WebView, поэтому нижняя граница определяется движком операционной системы:
+OpenPencil отрисовывает графику через CanvasKit на WebGL и использует современные возможности веб-платформы, поэтому нужен свежий движок браузера. Веб-версия работает в Chrome 111, Edge 111, Firefox 128 и Safari 16.4 или новее; браузеры на основе Chromium, например Brave и Opera, ориентируются на версию своего Chrome. Настольное приложение — нативное окно Iced:
 
 | Платформа | Требование |
 | --------- | ---------- |
-| macOS | macOS 13 Ventura или новее с актуальными обновлениями Safari (Safari 16.4 вышел вместе с macOS 13.3). |
-| Windows | Windows 10 или новее со средой Microsoft Edge WebView2 Evergreen, которая обновляется сама. |
-| Linux | WebKitGTK 2.40 или новее (`webkit2gtk-4.1`). |
+| macOS | Актуальная версия macOS. |
+| Windows | Windows 10 или новее. |
+| Linux | GTK 3 для диалогов файлов, а также libxkbcommon, Wayland и Vulkan для сборки. |
 
 Если движок слишком старый, OpenPencil вместо пустого окна показывает, что нужно обновить. Если вы видите такое уведомление в системе, которая подходит под требования, воспользуйтесь ссылкой «Report a problem»: в ней уже указаны сведения о браузере и движке.
 
@@ -50,7 +50,7 @@ brew install --cask openpencil
 ### Что потребуется
 
 - [Bun](https://bun.sh/) — среда выполнения и менеджер пакетов;
-- [Rust](https://rustup.rs/) — только для приложения Tauri.
+- [Rust](https://rustup.rs/) 1.88 или новее — только для настольного приложения.
 
 ### Установка
 
@@ -82,49 +82,34 @@ bun run dev
 | `bun run docs:build` | Быстро собрать документацию для локальной проверки |
 | `bun run docs:build:production` | Полностью собрать документацию для публикации, включая файлы для LLM |
 
-## Приложение Tauri
+## Настольное приложение (Iced)
 
-Для сборки приложения Tauri нужны Rust и системные компоненты выбранной платформы.
-
-### macOS
+Окно рабочего стола — нативное приложение [Iced](https://iced.rs/). Нужны Rust 1.88 или новее и [Bun](https://bun.sh). Установите зависимости, соберите пакеты и запустите окно из checkout. Сессия редактора — процесс Bun, который вызывает `@open-pencil/core`.
 
 ```sh
-xcode-select --install
-cargo install tauri-cli --version "^2"
-bun run tauri dev
+bun install
+bun run build:packages
+bun run desktop
 ```
 
 ### Windows
 
-1. Установите [Rust](https://rustup.rs/) с toolchain `stable-msvc`:
-   ```sh
-   rustup default stable-msvc
-   ```
-2. Установите [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) и выберите workload **Desktop development with C++**.
-3. WebView2 уже входит в Windows 10 версии 1803 и новее, а также в Windows 11.
-4. Выполните:
-   ```sh
-   bun run tauri dev
-   ```
+Установите [Rust](https://rustup.rs/) с toolchain `stable-msvc` и [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) с workload **Desktop development with C++**, затем выполните `bun run desktop`.
 
 ### Linux
 
 В Debian или Ubuntu установите системные зависимости:
 
 ```sh
-sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file \
-  libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+sudo apt install pkg-config libxkbcommon-dev libwayland-dev libvulkan-dev libgtk-3-dev libssl-dev
 ```
 
-Затем выполните:
+Диалоги файлов также требуют GTK или XDG desktop portal. Затем выполните `bun run desktop`.
+
+### Сборка для распространения
 
 ```sh
-bun run tauri dev
+cd desktop && cargo build --release
 ```
 
-### Сборка установочного пакета
-
-```sh
-bun run tauri build                                    # Текущая платформа
-bun run tauri build --target universal-apple-darwin    # Universal binary для macOS
-```
+Файл — `desktop/target/release/OpenPencil` (в Windows `OpenPencil.exe`). Он по-прежнему запускает сессию редактора через Bun из этого репозитория, если `OPENPENCIL_SESSION_HOST` не указывает на `packages/cli/src/desktop-session/serve.ts`.

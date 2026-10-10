@@ -113,7 +113,7 @@ openpencil eval design.fig -c "..."     # Figma Plugin API
 
 ## Настольная и веб-версии
 
-**Настольное приложение:** Tauri v2, около 7 МБ, версии для macOS, Windows и Linux, системные меню, работа без сети и автосохранение.
+**Настольное приложение:** нативное окно Iced для macOS, Windows и Linux. Меню File, Edit, View и Object открывают и сохраняют документы. Редактор Vue остаётся приложением в браузере.
 
 **Веб-приложение:** [app.openpencil.dev](https://app.openpencil.dev), установка как PWA и интерфейс для сенсорных экранов.
 

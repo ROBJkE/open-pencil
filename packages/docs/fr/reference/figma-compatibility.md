@@ -27,7 +27,7 @@ Comparaison entre les fonctions de Figma Design et l’état actuel d’OpenPenc
 | Vue filaire | 🔲 | Pas de contours de tous les calques |
 | Miniature personnalisée | 🔲 | Générée à l’export, mais non configurable |
 | Pas de déplacement | 🔲 | 1 px et 10 px ; pas de valeurs personnalisées |
-| Menu de l’application | ✅ | Menus dans le navigateur et menus natifs Tauri |
+| Menu de l’application | ✅ | Menus dans le navigateur ; la fenêtre Iced a Fichier, Édition, Affichage et Objet |
 | Outils AI | 🟡 | 90 outils ; pas d’images générées ni de recherche AI |
 
 ## Calques et formes

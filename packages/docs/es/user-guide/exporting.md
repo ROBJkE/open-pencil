@@ -24,7 +24,7 @@ El menú contextual copia la selección al portapapeles como texto, SVG, PNG o J
 
 ## Guardar documentos
 
-**Guardar** actualiza el archivo actual. **Guardar como…** permite elegir una ubicación nueva. En Tauri se usan diálogos nativos; Chrome y Edge pueden usar File System Access API; otros navegadores descargan el archivo.
+**Guardar** actualiza el archivo actual. **Guardar como…** permite elegir una ubicación nueva. La ventana Iced usa un diálogo nativo; Chrome y Edge pueden usar File System Access API; otros navegadores descargan el archivo.
 
 Los archivos `.fig` exportados incluyen datos Kiwi, compresión Zstandard y miniatura. Los componentes y conjuntos se conservan para poder volver a abrir el archivo en Figma.
 

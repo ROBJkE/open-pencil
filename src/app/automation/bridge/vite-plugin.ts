@@ -153,7 +153,7 @@ export function configurationsMatch(
   )
 }
 
-// TODO: production — bundle MCP server as Tauri sidecar or spawn via shell plugin
+// TODO: production — start the MCP server beside the browser app without a desktop sidecar
 export function automationPlugin(
   authToken: string | null,
   options: AutomationPluginOptions

@@ -10,19 +10,10 @@ import {
   type FontFamilyOption,
   type LocalFontAccessState,
   type WebFontProviderId,
-  UnsupportedFontFormatError
 } from '@open-pencil/core/text'
 import type { SceneGraph } from '@open-pencil/scene-graph'
 
 import { browserWebFontFetch } from '@/app/editor/fonts/browser-fetch'
-import {
-  clearDownloadedFontCache as clearTauriDownloadedFontCache,
-  createTauriDownloadedFontCache,
-  downloadedFontCacheSummary as tauriDownloadedFontCacheSummary
-} from '@/app/editor/fonts/cache'
-import { isTauri } from '@/app/tauri/env'
-import { tauriFetch } from '@/app/tauri/http'
-import { IS_TAURI } from '@/constants'
 
 if (typeof navigator !== 'undefined') {
   fontManager.setFallbackUserAgent(navigator.userAgent)
@@ -44,7 +35,7 @@ watch(
         ? Object.fromEntries(
             WEB_FONT_PROVIDER_IDS.map((provider) => [
               provider,
-              fontProviderSettings.value[provider] && (isTauri() || provider !== 'google')
+              fontProviderSettings.value[provider] && provider !== 'google'
             ])
           )
         : {}
@@ -53,104 +44,41 @@ watch(
   { deep: true, immediate: true }
 )
 
-let tauriFontCacheConfigured = false
+fontManager.setWebFontFetch(browserWebFontFetch)
 
-function configureTauriFontCache() {
-  if (tauriFontCacheConfigured || !isTauri()) return
-  tauriFontCacheConfigured = true
-  fontManager.setDownloadedFontCache(createTauriDownloadedFontCache())
-  fontManager.setWebFontFetch(tauriFetch)
-  fontManager.setHostFontLoader(loadSystemFont)
-}
-
-configureTauriFontCache()
-if (!isTauri()) fontManager.setWebFontFetch(browserWebFontFetch)
-
-interface TauriFontFamily {
+export interface ListedFontFamily {
   family: string
   styles: string[]
 }
 
-let tauriFontsCache: TauriFontFamily[] | null = null
-let tauriFontsPromise: Promise<TauriFontFamily[]> | null = null
-
-async function getTauriFonts(): Promise<TauriFontFamily[]> {
-  if (tauriFontsCache) return tauriFontsCache
-  if (!tauriFontsPromise) {
-    tauriFontsPromise = import('@tauri-apps/api/core')
-      .then(({ invoke }) => invoke<TauriFontFamily[]>('list_system_fonts'))
-      .then((fonts) => {
-        tauriFontsCache = fonts
-        return fonts
-      })
-      .catch(() => [])
-  }
-  return tauriFontsPromise
-}
-
 export function preloadFonts(): void {
-  configureTauriFontCache()
-  if (isTauri()) {
-    void getTauriFonts().then(registerFontFaces)
-    return
-  }
   if (onlineFontsEnabled.value) fontManager.preloadWebFontFamilies()
 }
 
 export function localFontAccessState(): LocalFontAccessState {
-  return isTauri() ? 'granted' : fontManager.localAccessState()
+  return fontManager.localAccessState()
 }
 
 export async function requestLocalFontAccess(): Promise<FontFamilyOption[]> {
-  if (isTauri()) return listFamilies()
   await fontManager.requestLocalFontAccess()
   return listFamilies()
 }
 
 export async function downloadedFontCacheSummary() {
-  configureTauriFontCache()
-  if (!isTauri()) return { count: 0, byteLength: 0, updatedAt: null }
-  return tauriDownloadedFontCacheSummary()
+  return { count: 0, byteLength: 0, updatedAt: null }
 }
 
-export async function clearDownloadedFontCache(): Promise<void> {
-  configureTauriFontCache()
-  if (!isTauri()) return
-  await clearTauriDownloadedFontCache()
-}
+export async function clearDownloadedFontCache(): Promise<void> {}
 
 export async function predownloadFallbackFonts() {
   return fontManager.ensureFallbackPack()
 }
 
-function registerFontFaces(fonts: TauriFontFamily[]): void {
-  if (typeof document === 'undefined') return
-  for (const { family } of fonts) {
-    const face = new FontFace(family, `local("${family}")`)
-    document.fonts.add(face)
-  }
-}
-
 export async function listFamilies(): Promise<FontFamilyOption[]> {
-  configureTauriFontCache()
-  if (isTauri()) {
-    const [systemFonts, webFonts] = await Promise.all([
-      getTauriFonts(),
-      fontManager.listFamilyOptions()
-    ])
-    const byFamily = new Map(webFonts.map((font) => [font.family, font]))
-    for (const font of systemFonts)
-      byFamily.set(font.family, { family: font.family, source: 'local' })
-    return [...byFamily.values()].sort((a, b) => a.family.localeCompare(b.family))
-  }
   return fontManager.listFamilyOptions()
 }
 
-export async function listFonts(): Promise<TauriFontFamily[]> {
-  configureTauriFontCache()
-  if (isTauri()) {
-    return getTauriFonts()
-  }
+export async function listFonts(): Promise<ListedFontFamily[]> {
   return []
 }
 
@@ -171,7 +99,7 @@ export async function ensureGraphFonts(
     const { characters } = requirements
     await Promise.all(fontKeys.map(([family, style]) => loadFont(family, style, characters)))
     const fallbackScripts = missingGraphFontScripts(requirements, {
-      treatUnknownCoverageAsMissing: IS_TAURI
+      treatUnknownCoverageAsMissing: false
     })
     if (fallbackScripts.length > 0) {
       const fallbacks = await fontManager.ensureFallbackPack(fallbackScripts, characters)
@@ -198,29 +126,11 @@ function clearTextPictures(graph: SceneGraph, nodeIds: string[]): void {
   for (const id of nodeIds) clear(id)
 }
 
-type NativeFontLoadError = { code?: 'not-found' | 'unsupported-format' | 'failed' }
-
-async function loadSystemFont(family: string, style = 'Regular'): Promise<ArrayBuffer | null> {
-  if (!isTauri()) return null
-  try {
-    const { invoke } = await import('@tauri-apps/api/core')
-    const data = await invoke<ArrayBuffer>('load_system_font', { family, style })
-    if (data.byteLength === 0) return null
-    return data
-  } catch (error) {
-    if ((error as NativeFontLoadError | null)?.code === 'unsupported-format') {
-      throw new UnsupportedFontFormatError(family, style)
-    }
-    return null
-  }
-}
-
 export async function loadFont(
   family: string,
   style = 'Regular',
   characters = '',
   signal?: AbortSignal
 ): Promise<ArrayBuffer | null> {
-  configureTauriFontCache()
   return fontManager.loadFont(family, style, characters, signal)
 }

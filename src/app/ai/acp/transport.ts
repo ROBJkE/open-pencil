@@ -17,12 +17,12 @@ import { buildACPMCPServers } from '@/app/integrations/mcp'
 import { mapUpdate } from './map-update'
 import { spawnACPProcess } from './process'
 
-type TauriChild = Awaited<ReturnType<typeof spawnACPProcess>>['child']
+type AgentChild = Awaited<ReturnType<typeof spawnACPProcess>>['child']
 
 interface ACPSession {
   connection: ClientSideConnection
   sessionId: string
-  child: TauriChild
+  child: AgentChild
   onUpdate: ((params: SessionNotification) => void) | null
   dead: boolean
 }

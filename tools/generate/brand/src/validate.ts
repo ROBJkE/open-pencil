@@ -6,7 +6,7 @@ import { brand, targetFiles } from './config.ts'
 import type { BrandTarget } from './config.ts'
 import type { BrandFiles } from './web.ts'
 
-/** Tauri emits ICNS chunks from an unordered map; stabilize order without re-encoding images. */
+/** Order ICNS chunks by type so two generations of the same images match. */
 export function canonicalIcns(data: Buffer): Buffer {
   assert.ok(data.length >= 8 && data.toString('ascii', 0, 4) === 'icns', 'Invalid ICNS header')
   assert.equal(data.readUInt32BE(4), data.length, 'Invalid ICNS length')

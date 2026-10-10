@@ -26,7 +26,7 @@ Open Pencil is **~11× smaller** — and that's the whole point. It's not a simp
 
 ```
 ┌─────────────────────────────────┐
-│         Tauri (native shell)    │
+│         Iced (native window)    │
 │  ┌───────────────────────────┐  │
 │  │  Vue 3 + TypeScript       │  │
 │  │  ┌─────────┐ ┌──────────┐│  │
@@ -246,7 +246,7 @@ Open Pencil's approach is simpler and lower overhead. Penpot's approach is more 
 | Type checking | TypeScript (strict) | Runtime (Malli schemas) |
 | Build time | <5s (Vite) | Minutes (JVM startup + CLJS compile + Rust WASM) |
 | First contribution barrier | Low (TS/Vue) | High (Clojure + Rust + Docker) |
-| Desktop | Tauri v2 (~5MB) | N/A (browser-only) |
+| Desktop | Iced | N/A (browser-only) |
 | Hiring pool | Massive (TS/Vue devs) | Tiny (ClojureScript + Rust) |
 
 ## 9. Performance Characteristics
@@ -283,7 +283,7 @@ OpenPencil ships with an [`eval` command](/programmable/cli/scripting) that prov
 | **Code maintainability** | Open Pencil | ~26K LOC in 1 language vs 299K in 4+ languages |
 | **Figma compatibility** | Open Pencil | Native Kiwi codec vs no .fig support |
 | **Developer onboarding** | Open Pencil | TS/Vue vs Clojure/Rust/Docker |
-| **Desktop experience** | Open Pencil | Tauri native vs browser-only |
+| **Desktop experience** | Open Pencil | Iced window vs browser-only |
 | **Layout engine** | Open Pencil | Yoga (proven) vs custom dual implementation |
 | **Collaboration** | Tie | Penpot: server-based with access control; Open Pencil: P2P via Trystero + Yjs, zero hosting |
 | **Self-hosting** | Penpot | Docker-ready vs desktop-only |

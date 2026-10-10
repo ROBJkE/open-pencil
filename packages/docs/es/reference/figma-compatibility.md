@@ -27,7 +27,7 @@ Comparación entre las funciones de Figma Design y el estado actual de OpenPenci
 | Contornos de capas | 🔲 | No hay vista alámbrica |
 | Miniatura propia | 🔲 | Se genera al exportar, pero no puede elegirse |
 | Paso de movimiento | 🔲 | 1 px y 10 px; sin valores personalizados |
-| Menú de aplicación | ✅ | Archivo, Editar, Ver, Objeto, Texto y Organizar en navegador; menús nativos en Tauri |
+| Menú de aplicación | ✅ | Archivo, Editar, Ver, Objeto, Texto y Organizar en el navegador; la ventana Iced tiene Archivo, Edición, Vista y Objeto |
 | Herramientas de AI | 🟡 | 90 herramientas; sin imágenes generadas ni búsqueda con AI |
 
 ## Capas y formas
@@ -81,7 +81,7 @@ Comparación entre las funciones de Figma Design y el estado actual de OpenPenci
 |---------|--------|-------|
 | Texto y edición directa | ✅ | `textarea` invisible, cursor, selección por palabra/arrastre/doble o triple clic e intervalos de estilo |
 | Renderizado | ✅ | CanvasKit Paragraph para composición, saltos de línea y métricas |
-| Fuentes del sistema | ✅ | Inter predeterminada, font-kit en Tauri y `queryLocalFonts` en navegador |
+| Fuentes del sistema | ✅ | Inter predeterminada y `queryLocalFonts` en el navegador |
 | Familia y estilo | ✅ | FontPicker con desplazamiento virtual, búsqueda y vista previa CSS |
 | Tamaño e interlineado | ✅ | Editables en Tipografía |
 | Alineación | 🟡 | Alineación básica; faltan vertical y anchura/altura automáticas |

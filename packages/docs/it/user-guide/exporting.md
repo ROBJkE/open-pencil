@@ -19,7 +19,7 @@ Il menu contestuale copia la selezione come testo, SVG, PNG o JSX.
 
 ## Salvare documenti
 
-**Salva** aggiorna il file corrente. **Salva con nome…** sceglie una nuova posizione. Tauri usa finestre native; Chrome ed Edge possono usare File System Access API; gli altri browser scaricano il file.
+**Salva** aggiorna il file corrente. **Salva con nome…** sceglie una nuova posizione. La finestra Iced usa una finestra nativa; Chrome ed Edge possono usare File System Access API; gli altri browser scaricano il file.
 
 I file `.fig` esportati includono dati Kiwi, compressione Zstandard e miniatura. Componenti e insiemi vengono conservati per riaprire il file in Figma.
 

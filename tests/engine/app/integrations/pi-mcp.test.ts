@@ -1,14 +1,9 @@
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 
 import { MCP_AGENT_HEADER } from '@open-pencil/core/constants'
 
 import { replaceMCPConnectionSettings, setMCPConnectionCredential } from '@/app/integrations/mcp'
 import { buildPiMCPServers } from '@/app/integrations/mcp/pi'
-
-import { clearTauriMocks, installTauriMockWindow } from '#tests/helpers/tauri/mocks'
-
-beforeEach(installTauriMockWindow)
-afterEach(clearTauriMocks)
 
 describe('Pi MCP configuration', () => {
   test('adapts the built-in and external MCP servers to Pi native configuration', async () => {

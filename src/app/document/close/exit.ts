@@ -33,9 +33,6 @@ export function confirmAppExit(): Promise<boolean> {
   return approval.confirm()
 }
 
-/** Shared by the native Quit item and the platform exit request. */
 export async function requestAppExit(): Promise<void> {
-  if (!(await confirmAppExit())) return
-  const { exit } = await import('@tauri-apps/plugin-process')
-  await exit(0)
+  await confirmAppExit()
 }

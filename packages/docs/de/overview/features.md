@@ -98,7 +98,7 @@ Die Zusammenarbeit erfolgt direkt zwischen den Teilnehmern über WebRTC und ben�
 
 ## Desktop und Web
 
-**Desktop:** Tauri v2, rund 7 MB, für macOS, Windows und Linux, mit nativen Menüs, Offlinebetrieb und automatischem Speichern.
+**Desktop:** natives Iced-Fenster für macOS, Windows und Linux. Die Menüs Datei, Bearbeiten, Ansicht und Objekt öffnen und speichern Dokumente. Der Vue-Editor bleibt die Browser-App.
 
 **Web:** [app.openpencil.dev](https://app.openpencil.dev), als PWA installierbar und für Touch-Bedienung optimiert.
 

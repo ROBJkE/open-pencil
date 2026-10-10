@@ -12,21 +12,21 @@ Le versioni pronte per macOS, Windows e Linux sono disponibili nella [pagina del
 
 | Piattaforma | File |
 | --------------------- | -------------------- |
-| macOS (Apple Silicon) | `.dmg` (aarch64) |
-| macOS (Intel) | `.dmg` (x64) |
-| Windows (x64) | `.msi` / `.exe` |
-| Windows (ARM) | `.msi` / `.exe` |
-| Linux (x64) | `.AppImage` / `.deb` |
+| macOS (Apple Silicon) | `OpenPencil` |
+| macOS (Intel) | `OpenPencil` |
+| Windows (x64) | `OpenPencil.exe` |
+| Windows (ARM) | `OpenPencil.exe` |
+| Linux (x64) | `OpenPencil` |
 
 ## Requisiti di sistema
 
-OpenPencil esegue il rendering con CanvasKit su WebGL e usa funzionalità recenti della piattaforma web, quindi richiede un motore del browser aggiornato. L’app web supporta Chrome 111, Edge 111, Firefox 128 e Safari 16.4 o versioni successive; i browser basati su Chromium, come Brave e Opera, seguono la versione di Chrome. L’app desktop usa il WebView di sistema, quindi il requisito minimo dipende dal motore del sistema operativo:
+OpenPencil esegue il rendering con CanvasKit su WebGL e usa funzionalità recenti della piattaforma web, quindi richiede un motore del browser aggiornato. L’app web supporta Chrome 111, Edge 111, Firefox 128 e Safari 16.4 o versioni successive; i browser basati su Chromium, come Brave e Opera, seguono la versione di Chrome. L’app desktop è una finestra nativa Iced:
 
 | Piattaforma | Requisito |
 | ----------- | --------- |
-| macOS | macOS 13 Ventura o successivo con gli aggiornamenti correnti di Safari installati (Safari 16.4 è incluso in macOS 13.3). |
-| Windows | Windows 10 o successivo con il runtime Evergreen di Microsoft Edge WebView2, che si aggiorna da solo. |
-| Linux | WebKitGTK 2.40 o successivo (`webkit2gtk-4.1`). |
+| macOS | Un macOS aggiornato. |
+| Windows | Windows 10 o successivo. |
+| Linux | GTK 3 per le finestre di dialogo, più libxkbcommon, Wayland e Vulkan per compilare. |
 
 Se il motore è troppo vecchio, OpenPencil mostra cosa aggiornare invece di una finestra vuota. Se vedi questo avviso su un sistema che soddisfa i requisiti, usa il link «Report a problem», che precompila i dettagli di browser e motore.
 
@@ -50,7 +50,7 @@ brew install --cask openpencil
 ### Requisiti
 
 - [Bun](https://bun.sh/) come runtime e package manager;
-- [Rust](https://rustup.rs/) soltanto per l'applicazione Tauri.
+- [Rust](https://rustup.rs/) 1.88 o successivo, soltanto per l'applicazione desktop.
 
 ### Installazione
 
@@ -82,49 +82,34 @@ L'editor sarà disponibile all'indirizzo `http://localhost:1420`.
 | `bun run docs:build` | Genera rapidamente la documentazione per la verifica locale |
 | `bun run docs:build:production` | Genera la documentazione completa per la pubblicazione, inclusi i file per gli LLM |
 
-## Applicazione Tauri
+## Applicazione desktop (Iced)
 
-Per compilare l'applicazione Tauri sono necessari Rust e i componenti di sistema specifici della piattaforma.
-
-### macOS
+La finestra desktop è un'applicazione nativa [Iced](https://iced.rs/). Serve Rust 1.88 o successivo e [Bun](https://bun.sh). Installa le dipendenze, compila i pacchetti e avvia la finestra da un checkout. La sessione dell'editor è un processo Bun che guida `@open-pencil/core`.
 
 ```sh
-xcode-select --install
-cargo install tauri-cli --version "^2"
-bun run tauri dev
+bun install
+bun run build:packages
+bun run desktop
 ```
 
 ### Windows
 
-1. Installa [Rust](https://rustup.rs/) con il toolchain `stable-msvc`:
-   ```sh
-   rustup default stable-msvc
-   ```
-2. Installa [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) e seleziona il workload **Desktop development with C++**.
-3. WebView2 è già incluso in Windows 10 dalla versione 1803 e in Windows 11.
-4. Esegui:
-   ```sh
-   bun run tauri dev
-   ```
+Installa [Rust](https://rustup.rs/) con il toolchain `stable-msvc` e [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) con il workload **Desktop development with C++**, poi esegui `bun run desktop`.
 
 ### Linux
 
 In Debian o Ubuntu, installa le dipendenze di sistema:
 
 ```sh
-sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file \
-  libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+sudo apt install pkg-config libxkbcommon-dev libwayland-dev libvulkan-dev libgtk-3-dev libssl-dev
 ```
 
-Quindi esegui:
+Le finestre di dialogo richiedono anche GTK o un portale desktop XDG. Poi esegui `bun run desktop`.
+
+### Build di distribuzione
 
 ```sh
-bun run tauri dev
+cd desktop && cargo build --release
 ```
 
-### Generare un pacchetto di installazione
-
-```sh
-bun run tauri build                                    # Piattaforma corrente
-bun run tauri build --target universal-apple-darwin    # Universal Binary per macOS
-```
+Il binario è `desktop/target/release/OpenPencil` (`OpenPencil.exe` su Windows). Avvia ancora la sessione dell'editor con Bun da questo repository, a meno che `OPENPENCIL_SESSION_HOST` non punti a `packages/cli/src/desktop-session/serve.ts`.

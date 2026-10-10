@@ -22,7 +22,7 @@ export interface PendingOpenIo {
   openLink: (target: DeepLinkTarget, actions: DeepLinkActions) => Promise<void>
 }
 
-const tauriIo: PendingOpenIo = { openPath: openFileFromPath, openLink: openDeepLink }
+const pendingOpenIo: PendingOpenIo = { openPath: openFileFromPath, openLink: openDeepLink }
 
 function displayName(file: PendingOpenFile): string {
   return file.path.split(/[/\\]/).pop() ?? file.path
@@ -36,7 +36,7 @@ function displayName(file: PendingOpenFile): string {
 export async function openPendingFiles(
   files: readonly PendingOpenFile[],
   actions: DeepLinkActions,
-  io: PendingOpenIo = tauriIo
+  io: PendingOpenIo = pendingOpenIo
 ): Promise<void> {
   await openDesignFileBatch(files, displayName, async (file) => {
     // Only the deep-link resolver may turn a link's relative path into a real one.

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { IS_TAURI } from '@open-pencil/core/constants'
 import { useI18n } from '@open-pencil/vue'
 
 import { useCredentialSettings } from '@/app/settings/credentials/preferences/use'
@@ -14,9 +13,9 @@ const { busy, paused, failed, checkFailed, remembered, retry, retryCheck } = use
 </script>
 
 <template>
-  <SettingsSection v-if="!IS_TAURI || paused || failed || checkFailed">
+  <SettingsSection>
     <template #title>{{ credentials.settingsTitle }}</template>
-    <SettingsGroup v-if="!IS_TAURI">
+    <SettingsGroup>
       <label class="flex items-center justify-between gap-4 px-3 py-2.5">
         <span>
           <span class="block text-xs text-surface">{{ credentials.rememberDevice }}</span>

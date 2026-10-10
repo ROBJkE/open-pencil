@@ -27,7 +27,7 @@ Vergleich der Funktionen von Figma Design mit dem aktuellen Stand von OpenPencil
 | Ebenenkonturen | 🔲 | Keine Drahtgitteransicht |
 | Eigene Miniatur | 🔲 | Wird erzeugt, kann aber nicht gewählt werden |
 | Schrittweite | 🔲 | 1 px und 10 px, keine eigenen Werte |
-| Anwendungsmenü | ✅ | Browsermenü und native Tauri-Menüs |
+| Anwendungsmenü | ✅ | Browsermenü; das Iced-Fenster hat Datei, Bearbeiten, Ansicht und Objekt |
 | AI-Werkzeuge | 🟡 | 90 Werkzeuge; keine Bilderzeugung oder AI-Suche |
 
 ## Ebenen und Formen

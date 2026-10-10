@@ -24,9 +24,9 @@ body:
       label: Platform
       options:
         - Web (app.openpencil.dev)
-        - macOS (Tauri)
-        - Windows (Tauri)
-        - Linux (Tauri)
+        - macOS
+        - Windows
+        - Linux
         - CLI
         - MCP server
         - Not sure
@@ -57,7 +57,7 @@ body:
         - SVG/PDF/raster export
         - CLI
         - MCP / automation
-        - Tauri desktop
+        - Iced desktop
         - Collaboration
         - Documentation
         - Not sure

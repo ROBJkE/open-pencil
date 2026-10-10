@@ -16,8 +16,7 @@ than a few months as unverified.
 
 ## Provider CORS support
 
-Whether the **web build** can reach the provider at all. The desktop build bypasses CORS entirely
-(it routes through `tauriFetch`), so a ❌ here still works on desktop.
+Whether the browser app can reach the provider at all. The Iced desktop window does not call these providers.
 
 | Provider             | Base URL                                          | Browser | Notes                                                                                          | Tested     |
 | -------------------- | ------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------- | ---------- |

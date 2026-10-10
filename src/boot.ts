@@ -10,8 +10,6 @@ import { recordRuntimeError } from '@/app/diagnostics'
 import { preloadFonts } from '@/app/editor/fonts'
 import { observeBootErrors } from '@/app/shell/support/boot'
 import { reportBootFailure } from '@/app/shell/support/gate'
-import { IS_TAURI } from '@/constants'
-
 import App from './App.vue'
 import router from './router'
 
@@ -42,10 +40,8 @@ export async function boot(): Promise<void> {
     console.error(error)
   }
 
-  if (!IS_TAURI) {
-    void import('virtual:pwa-register').then(({ registerSW }) => {
-      registerSW({ immediate: true })
-      return undefined
-    })
-  }
+  void import('virtual:pwa-register').then(({ registerSW }) => {
+    registerSW({ immediate: true })
+    return undefined
+  })
 }

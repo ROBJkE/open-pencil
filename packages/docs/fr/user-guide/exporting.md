@@ -24,7 +24,7 @@ Le menu contextuel copie la sélection comme texte, SVG, PNG ou JSX.
 
 ## Enregistrer les documents
 
-**Enregistrer** met à jour le fichier actuel. **Enregistrer sous…** choisit un nouvel emplacement. Tauri utilise des dialogues natifs ; Chrome et Edge peuvent utiliser File System Access API ; les autres navigateurs téléchargent le fichier.
+**Enregistrer** met à jour le fichier actuel. **Enregistrer sous…** choisit un nouvel emplacement. La fenêtre Iced utilise un dialogue natif ; Chrome et Edge peuvent utiliser File System Access API ; les autres navigateurs téléchargent le fichier.
 
 Les fichiers `.fig` exportés contiennent les données Kiwi, la compression Zstandard et une miniature. Les composants et ensembles sont conservés pour pouvoir rouvrir le fichier dans Figma.
 

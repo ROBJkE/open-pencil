@@ -27,7 +27,7 @@ Porównanie funkcji Figma Design z obecnymi możliwościami OpenPencil.
 | Widok konturów | 🔲 | Brak widoku szkieletowego wszystkich warstw |
 | Własna miniatura | 🔲 | Miniatura jest generowana, ale nie można wybrać własnej |
 | Krok przesunięcia | 🔲 | Dostępne 1 i 10 pikseli; brak wartości własnych |
-| Menu aplikacji | ✅ | File, Edit, View, Object, Text i Arrange w przeglądarce; menu systemowe w Tauri |
+| Menu aplikacji | ✅ | File, Edit, View, Object, Text i Arrange w przeglądarce; okno Iced ma File, Edit, View i Object |
 | Narzędzia AI | 🟡 | 90 narzędzi przez dostawców modeli i MCP; brak generowania obrazów i wyszukiwania AI |
 
 ## Warstwy i kształty
@@ -81,7 +81,7 @@ Porównanie funkcji Figma Design z obecnymi możliwościami OpenPencil.
 |---------|------|-------|
 | Tekst i edycja bezpośrednia | ✅ | Ukryta `textarea`, kursor, zaznaczenie, wybór słowa, przeciąganie i zakresy stylów |
 | Renderowanie tekstu | ✅ | CanvasKit Paragraph do składania wierszy i metryk |
-| Czcionki systemowe | ✅ | Inter, font-kit w Tauri i `queryLocalFonts` w przeglądarce |
+| Czcionki systemowe | ✅ | Inter i `queryLocalFonts` w przeglądarce |
 | Rodzina i odmiana | ✅ | FontPicker z wyszukiwaniem, wirtualnym przewijaniem i podglądem |
 | Rozmiar i interlinia | ✅ | Edycja w sekcji Typografia |
 | Wyrównanie | 🟡 | Podstawowe; brak pionowego i wszystkich automatycznych trybów rozmiaru |

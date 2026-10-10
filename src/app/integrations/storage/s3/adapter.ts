@@ -2,7 +2,6 @@ import * as v from 'valibot'
 
 import { extractFigThumbnailFromReader } from '@open-pencil/fig'
 
-import { isTauri } from '@/app/tauri/env'
 
 import {
   NAMESPACE_MARKER_BODY,
@@ -125,7 +124,7 @@ export function createS3StorageAdapter(runtime: StorageProviderRuntime): S3Stora
         await listObjects(config, STORAGE_DOCUMENTS_PREFIX)
       } catch (error) {
         const isCORS =
-          error instanceof CloudCORSError || (!isTauri() && isLikelyCORSOrNetworkError(error))
+          error instanceof CloudCORSError || isLikelyCORSOrNetworkError(error)
         return {
           ok: false,
           message: connectionErrorMessage(error, isCORS),

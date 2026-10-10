@@ -1,9 +1,12 @@
-import type { DownloadEvent } from '@tauri-apps/plugin-updater'
 import { shallowRef, type ShallowRef } from 'vue'
 
 import type { UpdateFailureStep } from './messages'
 import type { DownloadProgress } from './progress'
-import { requestRestartApproval } from './restart'
+
+export type DownloadEvent =
+  | { event: 'Started'; data: { contentLength?: number } }
+  | { event: 'Progress'; data: { chunkLength: number } }
+  | { event: 'Finished' }
 
 export interface ReleaseInfo {
   version: string
@@ -22,7 +25,7 @@ export type UpdaterState =
   | { status: 'installed'; release: ReleaseInfo }
   | { status: 'failed'; step: UpdateFailureStep; release?: ReleaseInfo; error: string }
 
-/** The slice of a Tauri `Update` the window uses. */
+/** Download progress the update prompt displays. */
 export interface PendingUpdate {
   version: string
   currentVersion: string
@@ -62,7 +65,7 @@ interface Download {
 export function createUpdaterSession(backend: UpdaterBackend): UpdaterSession {
   const state = shallowRef<UpdaterState>({ status: 'checking' })
   let pending: PendingUpdate | null = null
-  // Tauri cannot abort a download, so cancelling only detaches the window from it.
+  // A download cannot be aborted, so cancelling only detaches the window from it.
   let download: Download | null = null
   let attachedTo: Download | null = null
 
@@ -236,23 +239,4 @@ function releaseInfo(update: PendingUpdate): ReleaseInfo {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
-}
-
-export function createTauriUpdaterBackend(): UpdaterBackend {
-  return {
-    async check() {
-      const { check } = await import('@tauri-apps/plugin-updater')
-      return check()
-    },
-    confirmRestart: requestRestartApproval,
-    async relaunch() {
-      const { relaunch } = await import('@tauri-apps/plugin-process')
-      await relaunch()
-    },
-    async closeWindow() {
-      const { getCurrentWindow } = await import('@tauri-apps/api/window')
-      await getCurrentWindow().close()
-    },
-    installQuitsApp: navigator.userAgent.includes('Windows')
-  }
 }

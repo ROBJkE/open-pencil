@@ -27,7 +27,7 @@ Feature-by-feature comparison of Figma Design capabilities with Open Pencil's cu
 | Layer outlines view | 🔲 | Wireframe view of all layers |
 | Custom file thumbnails | 🔲 | Thumbnail generated on export, but no custom thumbnail picker |
 | Nudge value settings | 🔲 | Default 1px/10px; Figma allows custom small/big nudge values |
-| App menu (browser mode) | ✅ | File, Edit, View, Object, Text, Arrange menus; Tauri uses native menus |
+| App menu (browser mode) | ✅ | File, Edit, View, Object, Text, Arrange menus; the Iced window has File, Edit, View, and Object |
 | AI tools | 🟡 | 90 tools via OpenRouter + MCP server; no AI-generated images or AI-powered search yet |
 
 ## Layers & Shapes
@@ -82,7 +82,7 @@ Feature-by-feature comparison of Figma Design capabilities with Open Pencil's cu
 | Text tool & inline editing | ✅ | Canvas-native editing, phantom textarea, cursor/selection/word select, drag to select, double/triple-click, rich text style runs (<kbd>⌘</kbd><kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd>, **S** button) |
 | Text on a path | 🟡 | Imports, renders, selects, resizes, edits, and exports Figma `TEXT_PATH`; character editing requires the referenced font's outlines to be available locally |
 | Text rendering (Paragraph API) | ✅ | CanvasKit Paragraph for shaping, line-breaking, metrics |
-| Font loading (system fonts) | ✅ | Inter default, font-kit in Tauri with OnceLock cache + preloading, queryLocalFonts in browser |
+| Font loading (system fonts) | ✅ | Inter default; the browser can use `queryLocalFonts` |
 | Font family & weight | ✅ | FontPicker with virtual scroll, search, CSS preview; weight selection in properties panel |
 | Font size & line height | ✅ | Editable in typography section |
 | Text alignment | 🟡 | Basic alignment; Figma has vertical alignment and auto-width/height modes |
@@ -192,7 +192,7 @@ Feature-by-feature comparison of Figma Design capabilities with Open Pencil's cu
 |---------|--------|-------|
 | .fig file import | ✅ | Full Kiwi codec: 194 definitions, ~390 fields per `NodeChange` |
 | .fig file export | ✅ | Kiwi encoding + Zstd compression + thumbnail generation; `COMPONENT`/COMPONENT_SET mapped to `SYMBOL` for round-trip |
-| Save / Save As | ✅ | <kbd>⌘</kbd><kbd>S</kbd> / <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd>; native dialogs (Tauri), File System Access API (Chrome/Edge), download fallback (Safari) |
+| Save / Save As | ✅ | <kbd>⌘</kbd><kbd>S</kbd> / <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd> in the browser; File System Access API (Chrome/Edge), download fallback (Safari); the Iced window uses a native save dialog |
 | Figma clipboard (paste) | ✅ | Decode Kiwi binary from Figma clipboard |
 | Figma clipboard (copy) | ✅ | Encode Kiwi binary that Figma can read |
 | Sketch file import | 🔲 | .sketch file parsing |

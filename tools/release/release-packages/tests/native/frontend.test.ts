@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -47,16 +47,11 @@ test.each(['valid', 'source', 'version', 'digest'])(
       if (scenario === 'digest') await writeFile(archive, 'changed archive')
 
       const operation = prepareSharedFrontend(context, commands)
-      const config = join(root, 'release-build-config.json')
 
       if (scenario === 'valid') {
         await operation
-        expect(JSON.parse(await readFile(config, 'utf8'))).toEqual({
-          build: { beforeBuildCommand: null }
-        })
       } else {
         await expect(operation).rejects.toThrow()
-        expect(await Bun.file(config).exists()).toBe(false)
       }
     } finally {
       await rm(root, { recursive: true, force: true })

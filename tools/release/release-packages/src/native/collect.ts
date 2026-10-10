@@ -10,7 +10,7 @@ import { digestFile, targetManifestSchema } from './manifest.ts'
 
 const { identity, paths, version } = createReleaseContext()
 const target = v.parse(v.picklist(desktopTargets), process.env.RELEASE_TARGET)
-const reported = JSON.parse(process.env.TAURI_ARTIFACT_PATHS ?? 'null')
+const reported = JSON.parse(process.env.DESKTOP_ARTIFACT_PATHS ?? 'null')
 const assets = await resolveReportedAssets(reported, desktopAssets(target, version), paths.root)
 
 await mkdir(paths.nativeOutput, { recursive: true })

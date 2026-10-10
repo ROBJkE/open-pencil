@@ -8,7 +8,7 @@ import { showsRoomDocument, type PendingRoomStatus } from '@/app/collab/room/sta
 import { DEFAULT_COLLAB_STATE, useCollabInjected } from '@/app/collab/use'
 import { useNotificationMessages } from '@/app/i18n/notifications'
 import { toast } from '@/app/shell/ui'
-import { DESKTOP_DOWNLOAD_URL, getShareURL, IS_BROWSER, IS_TAURI } from '@/constants'
+import { DESKTOP_DOWNLOAD_URL, getShareURL, IS_BROWSER } from '@/constants'
 
 /** What the room screens offer for the active tab's room: its link, a desktop handoff, Leave. */
 export function useRoomActions() {
@@ -34,7 +34,7 @@ export function useRoomActions() {
   // Browsers on a computer can hand the room to the desktop app; phones and the app cannot.
   const desktopLink = computed(() => {
     const roomId = state.value.roomId
-    if (!roomId || !IS_BROWSER || IS_TAURI || isMobile.value) return null
+    if (!roomId || !IS_BROWSER || isMobile.value) return null
     return roomLinkURL(roomId)
   })
   /** Offered beside the desktop link, for people without the app. */

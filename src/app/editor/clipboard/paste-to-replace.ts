@@ -4,23 +4,8 @@ import { getInMemoryClipboardHTML } from '@/app/editor/clipboard/memory'
 import { pasteClipboardHTML } from '@/app/editor/clipboard/paste'
 import { notificationMessages } from '@/app/i18n/notifications'
 import { toast } from '@/app/shell/ui'
-import { readTauriClipboardText } from '@/app/tauri/clipboard'
-import { isTauri } from '@/app/tauri/env'
 
 async function readClipboardHTML() {
-  if (isTauri()) {
-    try {
-      const text = await readTauriClipboardText()
-      if (isDesignClipboardHTML(text ?? '')) return text
-      const memory = getInMemoryClipboardHTML(text ?? '')
-      return memory && isDesignClipboardHTML(memory) ? memory : null
-    } catch (error) {
-      console.warn('Tauri clipboard read failed', error)
-      const memory = getInMemoryClipboardHTML()
-      return memory && isDesignClipboardHTML(memory) ? memory : null
-    }
-  }
-
   if (
     typeof navigator !== 'undefined' &&
     typeof (navigator as Partial<Navigator>).clipboard?.read === 'function'

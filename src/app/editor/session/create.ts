@@ -32,7 +32,7 @@ import { createInitialAppEditorState, type AppEditorState } from '@/app/editor/s
 import { notificationMessages } from '@/app/i18n/notifications'
 import { createDeferred } from '@/app/runtime/deferred'
 import { toast } from '@/app/shell/ui'
-import { IS_BROWSER, IS_TAURI } from '@/constants'
+import { IS_BROWSER } from '@/constants'
 
 export { EDITOR_TOOLS as TOOLS, TOOL_SHORTCUTS } from '@open-pencil/core/editor'
 export type { EditorToolDef as ToolDef, Tool } from '@open-pencil/core/editor'
@@ -47,7 +47,7 @@ function buildEditorStore(initialGraph?: SceneGraph) {
     graph,
     state,
     loadFont,
-    resolveFigmaClipboardImages: IS_TAURI ? resolveFigmaClipboardImages : undefined,
+    resolveFigmaClipboardImages,
     skipInitialGraphSetup: !!initialGraph,
     getViewportSize: () =>
       viewportSize.width > 0 && viewportSize.height > 0

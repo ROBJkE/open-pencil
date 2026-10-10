@@ -2,13 +2,6 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'bun:test'
 
 import { openExternalLink } from '@/app/shell/ui'
 
-import { clearTauriMocks, mockTauriIPC } from '#tests/helpers/tauri/mocks'
-
-/**
- * Tests for the browser (window.open) path only.
- * The Tauri path (dynamic import of @tauri-apps/plugin-opener) cannot be
- * exercised in bun:test since IS_TAURI evaluates to false outside Tauri.
- */
 describe('openExternalLink', () => {
   let mockOpen: ReturnType<typeof vi.fn>
 
@@ -21,8 +14,7 @@ describe('openExternalLink', () => {
     })
   })
 
-  afterEach(async () => {
-    await clearTauriMocks()
+  afterEach(() => {
     Reflect.deleteProperty(globalThis, 'window')
     vi.restoreAllMocks()
   })
@@ -43,17 +35,5 @@ describe('openExternalLink', () => {
     await openExternalLink('https://example.com/docs')
 
     expect(mockOpen).toHaveBeenCalledWith('https://example.com/docs', '_blank')
-  })
-
-  test('opens links through Tauri opener when running in Tauri', async () => {
-    await mockTauriIPC((cmd, args) => {
-      expect(cmd).toBe('plugin:opener|open_url')
-      expect(args).toEqual({ url: 'https://example.com/docs', with: undefined })
-      return null
-    })
-
-    await openExternalLink('https://example.com/docs')
-
-    expect(mockOpen).not.toHaveBeenCalled()
   })
 })

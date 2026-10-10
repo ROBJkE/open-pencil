@@ -1,17 +1,12 @@
 /**
- * Origins allowed to call the local server from a view.
+ * Origins allowed to call the local server from a view when no override is set.
  *
- * The desktop app's webview always calls the server from its own origin, so a
- * manually started server must allow it without extra configuration. Browsers
- * set `Origin` themselves, and only the Tauri webview serves these origins, so
- * allowing them does not expose the server to arbitrary websites. Requests still
- * need the bearer token whenever authentication is enabled.
+ * The desktop app is a native window and does not call this server from a
+ * webview, so the default list is empty. Browsers set `Origin` themselves.
+ * Set `OPENPENCIL_MCP_CORS_ORIGIN` to allow a dev server or the web app.
+ * Requests still need the bearer token whenever authentication is enabled.
  */
-export const DESKTOP_APP_ORIGINS = [
-  'tauri://localhost',
-  'http://tauri.localhost',
-  'https://tauri.localhost'
-] as const
+export const DESKTOP_APP_ORIGINS = [] as const
 
 /** Parse a comma-separated override. Returns null when nothing usable is set. */
 export function parseCORSOrigins(raw: string | undefined | null): string[] | null {

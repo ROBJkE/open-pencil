@@ -1,7 +1,6 @@
 import { describeDiagnosticError, recordDocumentFailure } from '@/app/diagnostics'
 import type { StorageDocumentBinding } from '@/app/integrations/storage/types'
 import { persistStorageCanvasLocally } from '@/app/storage/sync/persist'
-import { isTauri } from '@/app/tauri/env'
 
 type WriteDocumentState = { documentName: string }
 
@@ -17,7 +16,6 @@ type DocumentWriterOptions = {
 
 export function createDocumentWriter({
   state,
-  getFilePath,
   getFileHandle,
   getStorageBinding,
   setSavedVersion,
@@ -48,13 +46,7 @@ export function createDocumentWriter({
         return await finishWrite(version)
       }
 
-      const filePath = getFilePath()
       const fileHandle = getFileHandle()
-      if (filePath && isTauri()) {
-        const { writeFile: tauriWrite } = await import('@tauri-apps/plugin-fs')
-        await tauriWrite(filePath, data)
-        return await finishWrite(version)
-      }
       if (fileHandle) {
         const writable = await fileHandle.createWritable()
         await writable.write(new Uint8Array(data))

@@ -24,7 +24,7 @@ import { fractionalPosition } from '@open-pencil/scene-graph/order-keys'
 import type { GUID } from '@open-pencil/scene-graph/primitives'
 
 import type { SkiaRenderer } from '#core/canvas'
-import { CANVAS_BG_COLOR, IS_BROWSER, IS_TAURI } from '#core/constants'
+import { CANVAS_BG_COLOR, IS_BROWSER } from '#core/constants'
 import { applyEnabledLibrariesPluginData } from '#core/io/formats/fig/library-metadata'
 import { findFigThumbnailPageId } from '#core/io/formats/fig/thumbnail-page'
 import { renderThumbnail } from '#core/io/formats/raster'
@@ -78,7 +78,7 @@ async function renderFigThumbnail(
       THUMBNAIL_1X1
     )
   }
-  if (!renderHeadless || IS_BROWSER || IS_TAURI) return THUMBNAIL_1X1
+  if (!renderHeadless || IS_BROWSER) return THUMBNAIL_1X1
   const { headlessRenderThumbnail } = await import('#core/io/formats/raster')
   return (
     (await headlessRenderThumbnail(graph, pageId, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)) ??

@@ -15,19 +15,15 @@ git clone https://github.com/open-pencil/open-pencil.git
 cd open-pencil
 bun install
 bun run dev:portless  # Web editor at https://open-pencil.localhost
-bun run dev           # Fixed http://localhost:1420 for Playwright, Tauri, and Dev Containers
-bun run tauri dev     # Desktop app (requires Rust)
+bun run dev           # Fixed http://localhost:1420 for Playwright and Dev Containers
+bun run desktop       # Desktop app (requires Rust and Bun)
 ```
 
 The first Portless run creates and trusts a local HTTPS certificate. Linked Git worktrees receive branch-prefixed URLs such as `https://fix-ui.open-pencil.localhost` and matching `https://fix-ui.mcp.open-pencil.localhost` MCP bridges with isolated ports and socket files, so concurrent servers do not compete for port 1420. Run `bunx portless doctor` if routing or certificate trust fails.
 
-The repository also works in any [Dev Container](https://containers.dev/)-compatible tool: the container pins Bun, installs dependencies, and forwards port 1420; start with `bun run dev`. It covers the web editor, packages, CLI, and automated checks. Native Tauri development needs [Rust](https://rustup.rs/) and the [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/) on the host.
+The repository also works in any [Dev Container](https://containers.dev/)-compatible tool: the container pins Bun, installs dependencies, and forwards port 1420; start with `bun run dev`. It covers the web editor, packages, CLI, and automated checks. The desktop app needs [Rust](https://rustup.rs/) 1.88 or later on the host and `bun run desktop`.
 
-For macOS release builds with ad-hoc signing (no Apple Developer account, local testing only):
-
-```sh
-APPLE_SIGNING_IDENTITY=- bun run tauri build -c '{"bundle": { "createUpdaterArtifacts": false }}'
-```
+A release binary is `cd desktop && cargo build --release`. It still starts the editor session with Bun from this checkout unless `OPENPENCIL_SESSION_HOST` points at `packages/cli/src/desktop-session/serve.ts`.
 
 ## Making a change
 

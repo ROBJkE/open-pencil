@@ -129,7 +129,7 @@ P2P via WebRTC — no server required. Share a link and edit together.
 
 ## Desktop & Web
 
-**Desktop** — Tauri v2, ~7 MB. macOS (signed & notarized), Windows, Linux. Native menus, offline, autosave.
+**Desktop** — an Iced window for macOS, Windows, and Linux. File, Edit, View, and Object menus open and save documents. The Vue editor remains the browser app.
 
 **Web** — runs at [app.openpencil.dev](https://app.openpencil.dev), installable as a PWA on mobile with touch-optimized UI.
 

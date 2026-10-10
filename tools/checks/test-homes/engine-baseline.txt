@@ -100,7 +100,6 @@ tests/engine/app/storage/reconcile.test.ts
 tests/engine/app/storage/sync-outbox.test.ts
 tests/engine/app/storage/unique-name.test.ts
 tests/engine/app/tabs/open-file-dedup.test.ts
-tests/engine/app/tauri/http.test.ts
 tests/engine/app/usage/summarize.test.ts
 tests/engine/app/vector-edit-transforms.test.ts
 tests/engine/cli/app-client.test.ts
@@ -409,19 +408,6 @@ tests/engine/render/jsx/render-tree.test.ts
 tests/engine/render/jsx/scalar-variables.test.ts
 tests/engine/render/jsx/text-props.test.ts
 tests/engine/snap/basic.test.ts
-tests/engine/tauri/acp-transport.test.ts
-tests/engine/tauri/automation-files.test.ts
-tests/engine/tauri/command.test.ts
-tests/engine/tauri/document-io.test.ts
-tests/engine/tauri/fig-export.test.ts
-tests/engine/tauri/file-actions.test.ts
-tests/engine/tauri/font-cache.test.ts
-tests/engine/tauri/fonts.test.ts
-tests/engine/tauri/harness-process.test.ts
-tests/engine/tauri/http.test.ts
-tests/engine/tauri/mcp-spawn.test.ts
-tests/engine/tauri/mock-cleanup.test.ts
-tests/engine/tauri/processes.test.ts
 tests/engine/text/coverage.test.ts
 tests/engine/text/edit-undo.test.ts
 tests/engine/text/editor.test.ts

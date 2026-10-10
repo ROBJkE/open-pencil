@@ -6,7 +6,6 @@ import { WEB_FONT_PROVIDER_IDS, WEB_FONT_PROVIDER_LABELS } from '@open-pencil/co
 import type { WebFontProviderId } from '@open-pencil/core/text'
 import { useI18n, useRetainedPopup } from '@open-pencil/vue'
 
-import { isTauri } from '@/app/tauri/env'
 import AppButton from '@/components/ui/button/AppButton.vue'
 import { usePopoverUI } from '@/components/ui/overlay/popover'
 import Tip from '@/components/ui/overlay/Tip.vue'
@@ -26,7 +25,7 @@ const primaryButton = {
   variant: 'solid' as const,
   size: 'xs' as const
 }
-const showDownloadedFonts = isTauri()
+const showDownloadedFonts = false
 const webFontProviderIds = WEB_FONT_PROVIDER_IDS
 const { open: popoverOpen, portalActive } = useRetainedPopup()
 

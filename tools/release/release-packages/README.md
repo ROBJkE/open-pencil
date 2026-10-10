@@ -7,9 +7,9 @@
 `.github/workflows/build.yml` runs on a new stable tag, or through `workflow_dispatch` with an existing `vX.Y.Z` tag. A dispatch uses the selected workflow revision but builds the immutable application commit resolved from that tag. The source must be an ancestor of `origin/master`.
 
 1. **Plan:** resolve the source commit and generate the native matrix from `native/catalog.ts`.
-2. **Frontend:** build packages and the desktop frontend once; prepare and pack npm archives without rebuilding. Archive `dist`, desktop icons, and generated menus together and record its SHA-256.
-3. **Native:** five independent jobs check out that same source, verify and extract the shared inputs, then build through Node's Tauri CLI launcher. A generated config sets only `build.beforeBuildCommand` to `null`; the checked-in local build hook is unchanged. No native job uploads release assets.
-4. **Publish:** require the complete matrix with identical source/workflow/run/attempt/frontend identity. Verify file inventories, hashes, every updater signature and the release version it records (the desktop updater sets `requireSignedVersion`), and exact source changelog notes. Generate the updater JSON, source/workflow manifest, and checksums; attest and verify the complete output set. Verify npm consumers and publish the original tarballs with npm provenance. Replace every expected draft asset, then download and verify all uploaded bytes.
+2. **Frontend:** build packages and the browser app once; prepare and pack npm archives without rebuilding. Archive `dist` and record its SHA-256.
+3. **Native:** five independent jobs check out that same source, verify the shared web build, then `cargo build --release` the Iced binary. No native job uploads release assets.
+4. **Publish:** require the complete matrix with identical source/workflow/run/attempt/frontend identity. Verify file inventories, hashes, and exact source changelog notes. Write `latest.json` with an empty platform map, plus the source/workflow manifest and checksums; attest and verify the complete output set. Verify npm consumers and publish the original tarballs with npm provenance. Replace every expected draft asset, then download and verify all uploaded bytes.
 
 Workflow tooling is checked out separately in `.pipeline` and installed from its own frozen lockfile where it runs. Application dependency installation and builds remain owned by the tagged checkout; rebuilding an older tag must not accidentally execute its older release orchestration. Dependency installation is not frontend/package compilation.
 
@@ -17,7 +17,7 @@ The workflow leaves the GitHub Release **draft**. After successful verification,
 
 ## Artifact policy and provenance
 
-`native/catalog.ts` is OpenPencil's required asset/naming policy, not a replacement for Tauri artifact discovery. Collection consumes `tauri-action`'s `artifactPaths` output and refuses missing, duplicate, unexpected, empty, or escaping files. The macOS `.app` directory is ignored in favor of its required signed archive. Stable architecture-qualified macOS archive names are preserved.
+`native/catalog.ts` names the one unsigned Iced binary each desktop target must publish. Collection consumes the paths the build reports and refuses missing, duplicate, unexpected, empty, or escaping files.
 
 GitHub's default provenance identifies the **workflow execution revision**, which can differ from the tagged application source in a manual rebuild. The independently attested `release-manifest.json` records both commits, the workflow run/attempt, shared frontend digest, target file digests, and npm tarball digests. Do not describe the default workflow provenance alone as proof of the application's checked-out source. npm also emits its own provenance from the same workflow execution; the signed manifest binds its exact tarballs to the application source.
 
