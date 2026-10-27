@@ -13,6 +13,7 @@ const EXECUTABLES: &[&str] = &[
     "codex-acp",
     "gemini",
     "agent",
+    "cursor-agent",
     "openpencil-mcp-http",
     "openpencil-harness",
     "npm",

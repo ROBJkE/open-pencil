@@ -183,7 +183,7 @@ async function remove() {
             v-model="keyInput"
             :label="ai.apiKey"
             :saved="hasExistingKey"
-            :hint="hasExistingKey ? settings.savedCredentialHint : settings.optionalCredentialHint"
+            :hint="hasExistingKey ? settings.savedCredentialHint : ai.cursorUserKeyHint"
             :error="fieldErrors.credential"
             kind="api"
             :placeholder="hasExistingKey ? credentials.savedReplace : agentAPIKey.placeholder"

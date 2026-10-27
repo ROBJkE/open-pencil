@@ -18,6 +18,11 @@ export interface ACPAgentDef {
   name: string
   command: string
   args: string[]
+  /**
+   * Other executable names for the same program, used when `command` is not on PATH.
+   * The first name lookup finds is the one that is started.
+   */
+  commandAliases?: string[]
   /** The agent's own CLI, when the ACP program is a separate adapter for it. */
   cliCommand?: string
   /** npm package that provides `command` when it is an adapter. */
@@ -75,6 +80,7 @@ export const ACP_AGENTS: ACPAgentDef[] = [
     name: 'Cursor',
     command: 'agent',
     args: ['acp'],
+    commandAliases: ['cursor-agent'],
     setupURL: 'https://cursor.com/docs/cli/installation',
     apiKey: {
       integrationId: 'acp-cursor',

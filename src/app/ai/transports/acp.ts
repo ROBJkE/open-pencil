@@ -17,6 +17,7 @@ import { agentProcessEnv } from '@/app/ai/agents/acp/env'
 import { createUpdateMapper } from '@/app/ai/agents/acp/events'
 import { spawnACPProcess } from '@/app/ai/agents/acp/process'
 import { linkOwnTools } from '@/app/ai/agents/acp/tools'
+import { resolveSpawnCommand } from '@/app/ai/agents/setup/discovery'
 import SYSTEM_PROMPT from '@/app/ai/chat/system-prompt'
 import { endRun, forgetAgentChat, startAgentRun } from '@/app/ai/reply/run'
 import { describeDiagnosticError, recordACPTransportFailure } from '@/app/diagnostics'
@@ -275,7 +276,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
     let process: Awaited<ReturnType<typeof spawnACPProcess>>
     try {
       process = await spawnACPProcess({
-        command: this.agentDef.command,
+        command: await resolveSpawnCommand(this.agentDef),
         args: this.agentDef.args,
         logId: this.agentDef.id,
         destroying: () => this.destroying,
