@@ -3,6 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   appMenuAccelerator,
   appMenuShortcut,
+  nativeMenuAccelerator,
   shortcutTokenToAccelerator,
   shortcutTokenToTinykeys
 } from '@/app/shell/menu/shortcut'
@@ -17,18 +18,24 @@ describe('app menu shortcut conversion', () => {
     expect(shortcutTokenToTinykeys('MOD+SHIFT+S')).toBe('$mod+Shift+KeyS')
     expect(shortcutTokenToTinykeys('ALT+Delete')).toBe('Alt+Delete')
     expect(shortcutTokenToTinykeys('⌫')).toBe('Backspace')
+    expect(shortcutTokenToTinykeys("SHIFT+'")).toBe('Shift+Quote')
   })
 
-  test('converts shortcut tokens to native accelerators', () => {
+  test('converts command chords to native accelerators', () => {
     expect(shortcutTokenToAccelerator('MOD+SHIFT+S')).toBe('CmdOrCtrl+Shift+S')
-    expect(shortcutTokenToAccelerator('ALT+A')).toBe('Alt+A')
-    expect(shortcutTokenToAccelerator('⌫')).toBe('Backspace')
-    expect(shortcutTokenToAccelerator('⇞')).toBe('PageUp')
-    expect(shortcutTokenToAccelerator('⇟')).toBe('PageDown')
+    expect(shortcutTokenToAccelerator('MOD+S')).toBe('CmdOrCtrl+S')
+    expect(shortcutTokenToAccelerator('ALT+A')).toBeUndefined()
+    expect(shortcutTokenToAccelerator('N')).toBeUndefined()
+    expect(shortcutTokenToAccelerator('⌫')).toBeUndefined()
+    expect(shortcutTokenToAccelerator('SHIFT+N')).toBeUndefined()
+    expect(shortcutTokenToAccelerator('ALT+SHIFT+U')).toBeUndefined()
+    expect(nativeMenuAccelerator('CmdOrCtrl+Alt+I')).toBe('CmdOrCtrl+Alt+I')
+    expect(nativeMenuAccelerator('Backspace')).toBeUndefined()
   })
 
   test('derives native accelerators from menu ids', () => {
     expect(appMenuAccelerator('save-as')).toBe('CmdOrCtrl+Shift+S')
-    expect(appMenuAccelerator('selection.delete')).toBe('Backspace')
+    expect(appMenuAccelerator('selection.delete')).toBeUndefined()
+    expect(appMenuAccelerator('view.zoomNextFrame')).toBeUndefined()
   })
 })
