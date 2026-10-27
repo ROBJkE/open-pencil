@@ -14,6 +14,11 @@ import { requestRenameSelection } from '@/app/editor/selection/rename-dialog'
 import { TOOL_SHORTCUTS } from '@/app/editor/session'
 import { openSettingsDialog } from '@/app/settings/dialog'
 import { setSnappingPreference } from '@/app/settings/preferences/apply'
+import {
+  bareCommandKeybindings,
+  bareMenuKeybindings,
+  isCommandChordBinding
+} from '@/app/shell/keyboard/catalog'
 import { isButtonActivation, isEditing } from '@/app/shell/keyboard/focus'
 import { shortcutEvent } from '@/app/shell/keyboard/layout'
 import { bindSpaceHandTool } from '@/app/shell/keyboard/space-tool'
@@ -35,11 +40,16 @@ type ShortcutDefinition = {
   preview?: boolean
 }
 
-function commandShortcut(
-  command: EditorCommandId,
-  keys = editorCommandMetadata(command).keybinding
-): ShortcutDefinition | null {
-  return keys ? { id: command, keys, run: ({ runCommand }) => runCommand(command) } : null
+function commandChordKeys(keys: string | string[] | undefined): string[] {
+  return [keys ?? []].flat().filter((key) => isCommandChordBinding(key))
+}
+
+/** Command-modifier chords. Bare keys are bound from {@link bareCommandKeybindings}. */
+function commandShortcut(command: EditorCommandId): ShortcutDefinition | null {
+  const keys = commandChordKeys(editorCommandMetadata(command).keybinding)
+  return keys.length > 0
+    ? { id: command, keys, run: ({ runCommand }) => runCommand(command) }
+    : null
 }
 
 function commandShortcuts(...commands: EditorCommandId[]): ShortcutDefinition[] {
@@ -88,6 +98,69 @@ function siblingShortcut(
     },
     shouldPreventDefault: isCanvasFocus
   }
+}
+
+const BARE_MENU_RUNNERS: Partial<Record<string, ShortcutAction>> = {
+  'view-rulers': ({ store }) => {
+    store.state.showRulers = !store.state.showRulers
+    store.requestRepaint()
+  },
+  'view-pixel-grid': ({ store }) => {
+    store.state.showPixelGrid = store.state.showPixelGrid === false
+    store.requestRepaint()
+  },
+  'view-comments': () => useComments().toggleOnCanvas(),
+  'arrange.align-left': ({ store }) =>
+    store.alignNodes([...store.state.selectedIds], 'horizontal', 'min'),
+  'arrange.align-center': ({ store }) =>
+    store.alignNodes([...store.state.selectedIds], 'horizontal', 'center'),
+  'arrange.align-right': ({ store }) =>
+    store.alignNodes([...store.state.selectedIds], 'horizontal', 'max'),
+  'arrange.align-top': ({ store }) =>
+    store.alignNodes([...store.state.selectedIds], 'vertical', 'min'),
+  'arrange.align-middle': ({ store }) =>
+    store.alignNodes([...store.state.selectedIds], 'vertical', 'center'),
+  'arrange.align-bottom': ({ store }) =>
+    store.alignNodes([...store.state.selectedIds], 'vertical', 'max')
+}
+
+/** Bare command shortcuts. Delete, auto layout, and sibling focus keep their own runners. */
+function bareCommandShortcutDefinitions(): ShortcutDefinition[] {
+  return bareCommandKeybindings().map((shortcut) => {
+    if (
+      shortcut.id === 'selection.selectNextSibling' ||
+      shortcut.id === 'selection.selectPreviousSibling'
+    ) {
+      return siblingShortcut(shortcut.id)
+    }
+    if (shortcut.id === 'selection.delete') {
+      return {
+        id: shortcut.id,
+        keys: shortcut.keys,
+        run: ({ actions }) => actions.smartDelete(false)
+      }
+    }
+    if (shortcut.id === 'selection.wrapInAutoLayout') {
+      return {
+        id: shortcut.id,
+        keys: shortcut.keys,
+        run: ({ actions }) => actions.toggleAutoLayout()
+      }
+    }
+    return {
+      id: shortcut.id,
+      keys: shortcut.keys,
+      run: ({ runCommand }) => runCommand(shortcut.id)
+    }
+  })
+}
+
+function bareMenuShortcutDefinitions(): ShortcutDefinition[] {
+  return bareMenuKeybindings().map((shortcut) => {
+    const run = BARE_MENU_RUNNERS[shortcut.id]
+    if (!run) throw new Error(`No webview runner for menu shortcut ${shortcut.id}`)
+    return { id: shortcut.id, keys: shortcut.keys, run }
+  })
 }
 
 const EDITOR_SHORTCUT_OVERLAY_SELECTOR =
@@ -152,24 +225,16 @@ function bindToolShortcuts(bindings: KeyBindingMap, options: KeyboardShortcutRun
   }
 }
 
-export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
-  const spaceTool = bindSpaceHandTool(options.inputFocused, options.store)
-  const runOptions = (event: KeyboardEvent): KeyboardShortcutRunOptions => ({
-    ...options,
-    keyEvent: event,
-    spaceTool
-  })
-
-  const shortcuts: ShortcutDefinition[] = [
+/** Every webview shortcut except tool keys, which are bound beside these. */
+export function editorShortcutDefinitions(): ShortcutDefinition[] {
+  return [
     ...commandShortcuts(
       'selection.createComponent',
       'selection.detachInstance',
       'selection.createComponentSet',
       'selection.toggleMask',
       'selection.toggleVisibility',
-      'selection.toggleLock',
-      'selection.flipHorizontal',
-      'selection.flipVertical'
+      'selection.toggleLock'
     ),
     {
       id: 'copy-properties',
@@ -206,27 +271,10 @@ export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
       preview: true
     },
     {
-      id: 'toggle-rulers',
-      keys: 'Shift+KeyR',
-      run: ({ store }) => {
-        store.state.showRulers = !store.state.showRulers
-        store.requestRepaint()
-      }
-    },
-    {
       id: 'toggle-multiplayer-cursors',
       keys: '$mod+Alt+Backslash',
       run: ({ store }) => {
         store.state.showRemoteCursors = !store.state.showRemoteCursors
-        store.requestRepaint()
-      }
-    },
-    // Figma's keys, matched by key position since Shift turns ' into ".
-    {
-      id: 'toggle-pixel-grid',
-      keys: 'Shift+Quote',
-      run: ({ store }) => {
-        store.state.showPixelGrid = store.state.showPixelGrid === false
         store.requestRepaint()
       }
     },
@@ -242,11 +290,6 @@ export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
       run: ({ actions }) => actions.toggleUI()
     },
     { id: 'toggle-ai', keys: '$mod+KeyJ', run: ({ actions }) => actions.toggleAI() },
-    {
-      id: 'toggle-comments',
-      keys: appMenuTinykeysShortcut('view-comments') ?? 'Shift+KeyC',
-      run: () => useComments().toggleOnCanvas()
-    },
     {
       id: 'open-settings',
       keys: appMenuTinykeysShortcut('settings') ?? '$mod+Comma',
@@ -291,11 +334,6 @@ export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
       'view.zoom100',
       'view.zoomFit',
       'view.zoomSelection',
-      'view.zoomNextFrame',
-      'view.zoomPreviousFrame',
-      'view.nextPage',
-      'view.previousPage',
-      'selection.selectParent',
       'selection.duplicate',
       'selection.selectAll',
       'selection.selectInverse'
@@ -311,19 +349,9 @@ export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
       run: ({ openFileDialog }) => openFileDialog()
     },
     ...commandShortcuts('selection.group'),
-    {
-      id: 'toggle-auto-layout',
-      keys: 'Shift+KeyA',
-      run: ({ actions }) => actions.toggleAutoLayout()
-    },
-    ...commandShortcuts(
-      'selection.bringForward',
-      'selection.bringToFront',
-      'selection.sendBackward',
-      'selection.sendToBack'
-    ),
-    { id: 'delete-backspace', keys: 'Backspace', run: ({ actions }) => actions.smartDelete(false) },
-    { id: 'delete', keys: 'Delete', run: ({ actions }) => actions.smartDelete(false) },
+    ...commandShortcuts('selection.bringForward', 'selection.sendBackward'),
+    ...bareCommandShortcutDefinitions(),
+    ...bareMenuShortcutDefinitions(),
     { id: 'delete-alt', keys: 'Alt+Delete', run: ({ actions }) => actions.smartDelete(true) },
     { id: 'enter', keys: 'Enter', run: ({ actions }) => actions.confirmOrEditSelection() },
     {
@@ -332,10 +360,19 @@ export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
       run: ({ actions }) => actions.escapeOrDeselect(),
       preview: true
     },
-    siblingShortcut('selection.selectNextSibling'),
-    siblingShortcut('selection.selectPreviousSibling'),
     ...opacityBindings()
   ]
+}
+
+export function registerKeyboardShortcuts(options: KeyboardShortcutOptions) {
+  const spaceTool = bindSpaceHandTool(options.inputFocused, options.store)
+  const runOptions = (event: KeyboardEvent): KeyboardShortcutRunOptions => ({
+    ...options,
+    keyEvent: event,
+    spaceTool
+  })
+
+  const shortcuts = editorShortcutDefinitions()
 
   const bindings: KeyBindingMap = {}
   const globalBindings: KeyBindingMap = {}
