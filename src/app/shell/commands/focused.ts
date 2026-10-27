@@ -26,8 +26,10 @@ export function textFieldFocused(): boolean {
  * edits it has its own version of, and commands on the document or selection wait for the
  * canvas, as keyboard shortcuts do; view commands still run.
  *
- * Entry points that keep the person's focus, the native menu, run commands through this. The
- * command palette and the in-app menu take focus themselves and act on the document.
+ * This is the policy for choosing a menu item, not for a key. Shortcuts that type or edit are
+ * owned by the webview handler. Entry points that keep the person's focus, the native menu,
+ * run commands through this. The command palette and the in-app menu take focus themselves
+ * and act on the document.
  */
 export function runFocusedCommand(
   store: EditorStore,

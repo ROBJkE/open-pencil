@@ -514,6 +514,36 @@ test.describe('zoom shortcuts', () => {
   })
 })
 
+test.describe('agent chat typing', () => {
+  test('n and Backspace type into the chat instead of running shortcuts', async () => {
+    await editor.canvas.drawRect(120, 120, 80, 80)
+    const toolBefore = await getActiveTool()
+    const selectedBefore = await getSelectedCount()
+    expect(selectedBefore).toBeGreaterThan(0)
+
+    await editor.page.getByRole('tab', { name: 'AI' }).click()
+    await editor.page.getByTestId('provider-setup-open-settings').click()
+    await editor.page.getByTestId('settings-section-ai').click()
+    await editor.page.locator('[data-model-id]').first().click()
+    await editor.page.getByTestId('settings-model-provider').click()
+    await editor.page.getByRole('option', { name: 'OpenRouter' }).click()
+    await editor.page.getByLabel('Name').fill('Chat shortcut model')
+    await editor.page.getByTestId('provider-settings-api-key').fill('sk-or-chat-shortcut')
+    await editor.page.getByRole('button', { name: 'Save model' }).click()
+    await editor.page.getByTestId('app-settings-done').click()
+
+    const input = editor.page.getByTestId('chat-input')
+    await input.click()
+    await input.press('n')
+    await input.press('N')
+    await input.press('Backspace')
+
+    await expect(input).toHaveValue('n')
+    expect(await getActiveTool()).toBe(toolBefore)
+    expect(await getSelectedCount()).toBe(selectedBefore)
+  })
+})
+
 test.describe('auto-layout shortcut', () => {
   test('⇧A toggles auto-layout on frame', async () => {
     await editor.canvas.clearCanvas()

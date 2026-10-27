@@ -35,23 +35,40 @@ function normalizeShortcutToken(shortcut: string): string {
     : shortcut.replaceAll('↩', 'Enter').replaceAll('⇞', 'PageUp').replaceAll('⇟', 'PageDown')
 }
 
-/** A letter becomes its key code, which the keyboard registry matches by layout (`shortcutCode`). */
+/**
+ * A letter becomes its key code, which the keyboard registry matches by layout (`shortcutCode`).
+ * A quote becomes `Quote`, because Shift turns `'` into `"`.
+ */
 export function shortcutTokenToTinykeys(shortcut: string | undefined): string | undefined {
   return shortcut
     ? normalizeShortcutToken(shortcut)
         .replaceAll('MOD', '$mod')
         .replaceAll('SHIFT', 'Shift')
         .replaceAll('ALT', 'Alt')
+        .replaceAll("'", 'Quote')
         .replace(/(^|\+)([A-Z])$/, '$1Key$2')
     : undefined
 }
 
+/**
+ * The OS may own a shortcut only when it includes the command modifier. Any other chord types
+ * or edits, and the webview keyboard handler owns it so a text field can see the key.
+ */
 export function shortcutTokenToAccelerator(shortcut: string | undefined): string | undefined {
-  return shortcut
-    ? normalizeShortcutToken(shortcut)
-        .replaceAll('MOD', 'CmdOrCtrl')
-        .replaceAll('SHIFT', 'Shift')
-        .replaceAll('ALT', 'Alt')
+  if (!shortcut?.split('+').includes('MOD')) return undefined
+  return normalizeShortcutToken(shortcut)
+    .replaceAll('MOD', 'CmdOrCtrl')
+    .replaceAll('SHIFT', 'Shift')
+    .replaceAll('ALT', 'Alt')
+}
+
+const NATIVE_COMMAND_MODIFIERS = new Set(['CmdOrCtrl', 'Cmd', 'Ctrl', 'Command', 'Control'])
+
+/** An accelerator string the OS may install. Tokens are converted first. */
+export function nativeMenuAccelerator(accelerator: string | undefined): string | undefined {
+  if (!accelerator) return undefined
+  return accelerator.split('+').some((part) => NATIVE_COMMAND_MODIFIERS.has(part))
+    ? accelerator
     : undefined
 }
 
