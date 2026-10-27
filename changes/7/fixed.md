@@ -1,0 +1,1 @@
+- Typing in the agent chat and other text fields keeps letters and Backspace, instead of running shortcuts such as zoom to the next frame or delete.

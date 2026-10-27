@@ -159,8 +159,7 @@
       },
       {
         "id": "selection.delete",
-        "label": "Delete",
-        "accelerator": "Backspace"
+        "label": "Delete"
       },
       {
         "id": "selection.rename",
@@ -192,13 +191,11 @@
       },
       {
         "id": "view.zoomFit",
-        "label": "Zoom to Fit",
-        "accelerator": "Shift+1"
+        "label": "Zoom to Fit"
       },
       {
         "id": "view.zoomSelection",
-        "label": "Zoom to Selection",
-        "accelerator": "Shift+2"
+        "label": "Zoom to Selection"
       },
       {
         "id": "zoom-in",
@@ -215,23 +212,19 @@
       },
       {
         "id": "view.zoomPreviousFrame",
-        "label": "Zoom to Previous Frame",
-        "accelerator": "Shift+N"
+        "label": "Zoom to Previous Frame"
       },
       {
         "id": "view.zoomNextFrame",
-        "label": "Zoom to Next Frame",
-        "accelerator": "N"
+        "label": "Zoom to Next Frame"
       },
       {
         "id": "view.previousPage",
-        "label": "Previous Page",
-        "accelerator": "PageUp"
+        "label": "Previous Page"
       },
       {
         "id": "view.nextPage",
-        "label": "Next Page",
-        "accelerator": "PageDown"
+        "label": "Next Page"
       },
       {
         "type": "separator"
@@ -257,13 +250,11 @@
       {
         "id": "view-rulers",
         "label": "Rulers",
-        "accelerator": "Shift+R",
         "checkbox": true
       },
       {
         "id": "view-pixel-grid",
         "label": "Pixel Grid",
-        "accelerator": "Shift+'",
         "checkbox": true
       },
       {
@@ -280,7 +271,6 @@
       {
         "id": "view-comments",
         "label": "Comments",
-        "accelerator": "Shift+C",
         "checkbox": true
       },
       {
@@ -403,41 +393,34 @@
       },
       {
         "id": "selection.flipHorizontal",
-        "label": "Flip Horizontal",
-        "accelerator": "Shift+H"
+        "label": "Flip Horizontal"
       },
       {
         "id": "selection.flipVertical",
-        "label": "Flip Vertical",
-        "accelerator": "Shift+V"
+        "label": "Flip Vertical"
       },
       {
         "type": "separator"
       },
       {
         "id": "selection.booleanUnion",
-        "label": "Union selection",
-        "accelerator": "Alt+Shift+U"
+        "label": "Union selection"
       },
       {
         "id": "selection.booleanSubtract",
-        "label": "Subtract selection",
-        "accelerator": "Alt+Shift+S"
+        "label": "Subtract selection"
       },
       {
         "id": "selection.booleanIntersect",
-        "label": "Intersect selection",
-        "accelerator": "Alt+Shift+I"
+        "label": "Intersect selection"
       },
       {
         "id": "selection.booleanExclude",
-        "label": "Exclude selection",
-        "accelerator": "Alt+Shift+E"
+        "label": "Exclude selection"
       },
       {
         "id": "selection.flatten",
-        "label": "Flatten",
-        "accelerator": "Alt+Shift+F"
+        "label": "Flatten"
       },
       {
         "id": "selection.outlineText",
@@ -491,8 +474,7 @@
       },
       {
         "id": "selection.bringToFront",
-        "label": "Bring to Front",
-        "accelerator": "]"
+        "label": "Bring to Front"
       },
       {
         "id": "selection.sendBackward",
@@ -501,8 +483,7 @@
       },
       {
         "id": "selection.sendToBack",
-        "label": "Send to Back",
-        "accelerator": "["
+        "label": "Send to Back"
       }
     ]
   },
@@ -531,44 +512,37 @@
     "items": [
       {
         "id": "selection.wrapInAutoLayout",
-        "label": "Wrap in Auto Layout",
-        "accelerator": "Shift+A"
+        "label": "Wrap in Auto Layout"
       },
       {
         "type": "separator"
       },
       {
         "id": "arrange.align-left",
-        "label": "Align Left",
-        "accelerator": "Alt+A"
+        "label": "Align Left"
       },
       {
         "id": "arrange.align-center",
-        "label": "Align Center",
-        "accelerator": "Alt+H"
+        "label": "Align Center"
       },
       {
         "id": "arrange.align-right",
-        "label": "Align Right",
-        "accelerator": "Alt+D"
+        "label": "Align Right"
       },
       {
         "type": "separator"
       },
       {
         "id": "arrange.align-top",
-        "label": "Align Top",
-        "accelerator": "Alt+W"
+        "label": "Align Top"
       },
       {
         "id": "arrange.align-middle",
-        "label": "Align Middle",
-        "accelerator": "Alt+V"
+        "label": "Align Middle"
       },
       {
         "id": "arrange.align-bottom",
-        "label": "Align Bottom",
-        "accelerator": "Alt+S"
+        "label": "Align Bottom"
       },
       {
         "type": "separator"

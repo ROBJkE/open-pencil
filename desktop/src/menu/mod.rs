@@ -121,9 +121,10 @@ fn build_submenu<R: tauri::Runtime>(
             continue;
         }
 
-        // Ordinary menu accelerators emit a frontend command without preserving the
-        // WebView's focused editing control. Native edit items let WebKit/WebView2
-        // route copy, cut, and paste to inputs or dispatch canvas clipboard events.
+        // Accelerators in the generated menu are command chords only. An ordinary
+        // accelerator cannot see an HTML text field, so the webview keyboard handler
+        // owns every other shortcut. Native edit items let WebKit/WebView2 route
+        // copy, cut, and paste to inputs or dispatch canvas clipboard events.
         // Keep Linux on the frontend path: muda's native edit items require optional
         // X11 automation and are explicitly unsupported on Wayland.
         #[cfg(any(target_os = "macos", target_os = "windows"))]
