@@ -36,34 +36,10 @@ export type DetectedAgent = {
   status: 'available' | 'needs-adapter' | 'not-installed'
 }
 
-/** `command`, then any alias, so the canonical name wins when both are installed. */
-export function agentCommandNames(agent: ACPAgentDef): string[] {
-  return [agent.command, ...(agent.commandAliases ?? [])]
-}
-
-/** The executable to start: the first listed name that lookup found, or `command` when none did. */
-export function resolveAgentCommand(
-  agent: ACPAgentDef,
-  executables: AgentLookup['executables']
-): string {
-  return agentCommandNames(agent).find((name) => executables[name]) ?? agent.command
-}
-
-export async function resolveSpawnCommand(agent: ACPAgentDef): Promise<string> {
-  if (!agent.commandAliases?.length) return agent.command
-  try {
-    const executables = (await lookupAgents()).executables
-    return resolveAgentCommand(agent, executables)
-  } catch {
-    return agent.command
-  }
-}
-
 export function detectedAgents(lookup: AgentLookup): DetectedAgent[] {
   return ACP_AGENTS.map((definition) => {
-    const command = resolveAgentCommand(definition, lookup.executables)
     const cliPath = lookup.executables[definition.cliCommand ?? definition.command] ?? null
-    const adapterPath = lookup.executables[command] ?? null
+    const adapterPath = lookup.executables[definition.command] ?? null
     // An adapter package carries its agent, so it installs whether or not the CLI is there.
     const unavailableStatus = definition.adapterPackage ? 'needs-adapter' : 'not-installed'
     return {

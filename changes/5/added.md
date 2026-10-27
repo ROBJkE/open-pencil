@@ -1,1 +1,0 @@
-- The desktop app can use Cursor as the design agent with a personal API key from the Cursor dashboard. It starts `cursor-agent` when `agent` is not on PATH.

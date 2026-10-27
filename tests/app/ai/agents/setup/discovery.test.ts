@@ -2,11 +2,7 @@ import { describe, expect, test, mock } from 'bun:test'
 
 import type { ACPAgentDef } from '@open-pencil/core/constants'
 
-import {
-  createAgentDiscovery,
-  detectedAgents,
-  resolveAgentCommand
-} from '@/app/ai/agents/setup/discovery'
+import { createAgentDiscovery, detectedAgents } from '@/app/ai/agents/setup/discovery'
 import type { AgentLookup } from '@/app/ai/agents/setup/native'
 import { createDeferred } from '@/app/runtime/deferred'
 
@@ -149,8 +145,7 @@ describe('local agent discovery', () => {
     expect(agents.map((agent) => [agent.definition.id, agent.status])).toEqual([
       ['claude-code', 'needs-adapter'],
       ['codex', 'available'],
-      ['gemini-cli', 'not-installed'],
-      ['cursor', 'not-installed']
+      ['gemini-cli', 'not-installed']
     ])
   })
 
@@ -159,23 +154,8 @@ describe('local agent discovery', () => {
     expect(agents.map((agent) => [agent.definition.id, agent.status])).toEqual([
       ['claude-code', 'needs-adapter'],
       ['codex', 'needs-adapter'],
-      ['gemini-cli', 'not-installed'],
-      ['cursor', 'not-installed']
+      ['gemini-cli', 'not-installed']
     ])
-  })
-
-  test('starts cursor-agent when agent itself is not installed', () => {
-    const found = lookup('cursor-agent')
-    const cursor = detectedAgents(found).find((agent) => agent.definition.id === 'cursor')
-    expect(cursor?.status).toBe('available')
-    if (!cursor) return
-    expect(resolveAgentCommand(cursor.definition, found.executables)).toBe('cursor-agent')
-    expect(
-      resolveAgentCommand(cursor.definition, {
-        ...found.executables,
-        agent: '/test/bin/agent'
-      })
-    ).toBe('agent')
   })
 
   test('browser discovery performs no native operations', async () => {

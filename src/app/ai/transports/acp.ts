@@ -13,11 +13,9 @@ import * as v from 'valibot'
 import type { ACPAgentDef } from '@open-pencil/core/constants'
 
 import { parseAuthStatusUpdate } from '@/app/ai/agents/acp/auth/status'
-import { agentProcessEnv } from '@/app/ai/agents/acp/env'
 import { createUpdateMapper } from '@/app/ai/agents/acp/events'
 import { spawnACPProcess } from '@/app/ai/agents/acp/process'
 import { linkOwnTools } from '@/app/ai/agents/acp/tools'
-import { resolveSpawnCommand } from '@/app/ai/agents/setup/discovery'
 import SYSTEM_PROMPT from '@/app/ai/chat/system-prompt'
 import { endRun, forgetAgentChat, startAgentRun } from '@/app/ai/reply/run'
 import { describeDiagnosticError, recordACPTransportFailure } from '@/app/diagnostics'
@@ -276,7 +274,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
     let process: Awaited<ReturnType<typeof spawnACPProcess>>
     try {
       process = await spawnACPProcess({
-        command: await resolveSpawnCommand(this.agentDef),
+        command: this.agentDef.command,
         args: this.agentDef.args,
         logId: this.agentDef.id,
         destroying: () => this.destroying,
@@ -284,8 +282,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
           if (!this.session) return
           this.session.dead = true
           this.session = null
-        },
-        env: await agentProcessEnv(this.agentDef)
+        }
       })
     } catch (e) {
       recordACPTransportFailure({ operation: 'start', ...describeDiagnosticError(e) })
