@@ -6,6 +6,7 @@ export type AIChatFailureReason =
   | 'insufficient-credit'
   | 'cloud-credits-exhausted'
   | 'model-not-found'
+  | 'agent-not-installed'
   | 'network'
   | 'output-limit'
   | 'rate-limit'
@@ -98,6 +99,13 @@ function failureReason(error: unknown): AIChatFailureReason {
   }
   if (text.includes('rate limit') || text.includes('too many requests')) return 'rate-limit'
   if (text.includes('model not found') || text.includes('unknown model')) return 'model-not-found'
+  if (
+    text.includes('is not installed') ||
+    text.includes('program not found') ||
+    text.includes('enoent')
+  ) {
+    return 'agent-not-installed'
+  }
   if (
     text.includes('failed to fetch') ||
     text.includes('network') ||

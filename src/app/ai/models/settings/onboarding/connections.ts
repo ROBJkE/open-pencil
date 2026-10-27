@@ -1,6 +1,8 @@
 import { tryOnScopeDispose } from '@vueuse/core'
 import { reactive } from 'vue'
 
+import { acpAgentForProvider } from '@open-pencil/core/constants'
+
 import {
   aiModelSettings,
   modelConnectionCredentialStatus,
@@ -131,7 +133,7 @@ export function useOnboardingConnections({ plannedModel }: OnboardingConnections
 
   /** The configured connection matching what is entered now, whose saved key may be used. */
   function savedConnection(providerID: OnboardingAccess): AIModelConnection | null {
-    if (isOnboardingAgent(providerID)) return null
+    if (isOnboardingAgent(providerID) && !acpAgentForProvider(providerID)?.apiKey) return null
     const saved = existingOnboardingConnection(providerID, connection(providerID).customBaseURL)
     if (saved && !(saved.id in keyStatuses)) {
       keyStatuses[saved.id] = 'missing'
