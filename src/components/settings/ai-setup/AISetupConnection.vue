@@ -123,7 +123,7 @@ const keyHint = computed(() => {
         :model-value="state.apiKey"
         :label="ai.apiKey"
         :saved="hasSavedKey"
-        :hint="hasSavedKey ? settings.savedCredentialHint : settings.optionalCredentialHint"
+        :hint="hasSavedKey ? settings.savedCredentialHint : ai.cursorUserKeyHint"
         kind="api"
         :placeholder="hasSavedKey ? credentials.savedReplace : agent.apiKey.placeholder"
         :key-u-r-l="agent.apiKey.url"

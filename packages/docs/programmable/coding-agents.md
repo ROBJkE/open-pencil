@@ -56,7 +56,7 @@ Cursor's CLI speaks ACP itself, so there is no separate program. Install it from
 curl https://cursor.com/install -fsS | bash
 ```
 
-On Windows, use the PowerShell command on that page. The program is `agent`, usually `~/.local/bin/agent`.
+On Windows, use the PowerShell command on that page. The program is `agent`, usually `~/.local/bin/agent`. Some installs name it `cursor-agent` instead. OpenPencil starts whichever is on your `PATH`, preferring `agent`.
 
 Paste a personal user API key from [Cursor Dashboard → API Keys](https://cursor.com/dashboard) into the Cursor model's settings. OpenPencil passes it only as `CURSOR_API_KEY` when it starts the agent. A team Admin key does not work. If no key is saved, a previous `agent login` is used.
 
