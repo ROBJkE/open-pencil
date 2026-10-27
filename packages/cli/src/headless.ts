@@ -39,6 +39,9 @@ function documentAssetReader(filePath: string) {
 
 export async function loadDocument(filePath: string): Promise<SceneGraph> {
   const bytes = new Uint8Array(await readFile(filePath))
+  // A format laid out as it is read places its layers by their text's size, which is measured
+  // as an export draws it rather than estimated.
+  if (io.findReader(filePath)?.laysOutOnRead) await measureTextHeadlessly()
   const { graph } = await io.readDocument({
     name: filePath,
     data: bytes,
@@ -90,9 +93,9 @@ export const documentWriteOptions = {
   output: { type: 'string', alias: 'o', description: 'Write to a different file', required: false }
 } as const
 
-/** Save a headless document as `.fig`, as `eval --write` and `diff apply --write` do. */
+/** Save a headless document as `.fig`, with the thumbnail `export --format fig` renders. */
 export async function writeFigDocument(graph: SceneGraph, filePath: string): Promise<void> {
-  const result = await io.writeDocument('fig', graph)
+  const result = await io.writeDocument('fig', graph, { renderThumbnail: true })
   await writeFile(filePath, result.data as Uint8Array)
 }
 
