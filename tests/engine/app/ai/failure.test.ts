@@ -77,6 +77,9 @@ describe('AI chat failures', () => {
     expect(classifyAIChatError(new Error('API key expired.')).reason).toBe('authentication')
     expect(classifyAIChatError(new Error('Invalid API key.')).reason).toBe('authentication')
     expect(classifyAIChatError(new Error('Failed to fetch provider')).reason).toBe('network')
+    expect(classifyAIChatError(new Error('"agent" is not installed.')).reason).toBe(
+      'agent-not-installed'
+    )
     expect(classifyAIChatError(new Error('Provider unavailable')).reason).toBe('request-failed')
   })
 

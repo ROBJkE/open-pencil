@@ -149,6 +149,8 @@ const failureMessage = computed(() => {
       return cloudCreditsMessage(chatFailure.value.resetsAt)
     case 'model-not-found':
       return ai.value.chatModelNotFound
+    case 'agent-not-installed':
+      return ai.value.chatAgentNotInstalled
     case 'network':
       return ai.value.chatNetworkFailed
     case 'output-limit':
@@ -166,9 +168,14 @@ const failureMessage = computed(() => {
   }
 })
 const failureHasSettingsAction = computed(() =>
-  ['authentication', 'forbidden', 'model-not-found', 'sign-in-expired', 'plan-forbidden'].includes(
-    chatFailure.value?.reason ?? ''
-  )
+  [
+    'authentication',
+    'forbidden',
+    'model-not-found',
+    'agent-not-installed',
+    'sign-in-expired',
+    'plan-forbidden'
+  ].includes(chatFailure.value?.reason ?? '')
 )
 const status = computed(() => chat.value?.status ?? 'ready')
 const showContinue = computed(() => {

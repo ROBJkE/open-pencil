@@ -73,7 +73,7 @@ const emit = defineEmits<{
   cancelAgentSignIn: []
   submitAgentSignInCode: [code: string]
 }>()
-const { ai, credentials } = useI18n()
+const { ai, credentials, settings } = useI18n()
 const styles = tv(theme)()
 
 const name = computed(() =>
@@ -106,17 +106,31 @@ const keyHint = computed(() => {
       {{ name }}
     </h3>
 
-    <AgentSetup
-      v-if="agent && agentSetup"
-      :agent="agent"
-      :setup="agentSetup"
-      @check="emit('checkAgent')"
-      @install-agent="emit('installAgent')"
-      @install-bridge="emit('installBridge')"
-      @sign-in="emit('signInAgent')"
-      @cancel-sign-in="emit('cancelAgentSignIn')"
-      @submit-sign-in-code="emit('submitAgentSignInCode', $event)"
-    />
+    <template v-if="agent">
+      <AgentSetup
+        v-if="agentSetup"
+        :agent="agent"
+        :setup="agentSetup"
+        @check="emit('checkAgent')"
+        @install-agent="emit('installAgent')"
+        @install-bridge="emit('installBridge')"
+        @sign-in="emit('signInAgent')"
+        @cancel-sign-in="emit('cancelAgentSignIn')"
+        @submit-sign-in-code="emit('submitAgentSignInCode', $event)"
+      />
+      <ProviderSettingsKeyField
+        v-if="agent.apiKey"
+        :model-value="state.apiKey"
+        :label="ai.apiKey"
+        :saved="hasSavedKey"
+        :hint="hasSavedKey ? settings.savedCredentialHint : ai.cursorUserKeyHint"
+        kind="api"
+        :placeholder="hasSavedKey ? credentials.savedReplace : agent.apiKey.placeholder"
+        :key-u-r-l="agent.apiKey.url"
+        :key-u-r-l-label="credentials.getAPIKey"
+        @update:model-value="emit('update', { apiKey: $event })"
+      />
+    </template>
     <PiSetup
       v-else-if="piSetup"
       :setup="piSetup"
