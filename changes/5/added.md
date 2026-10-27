@@ -1,0 +1,1 @@
+- The desktop app can use Cursor as the design agent with a personal API key from the Cursor dashboard.
