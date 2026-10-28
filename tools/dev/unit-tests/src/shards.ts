@@ -68,7 +68,8 @@ export const UNIT_TEST_GROUPS = {
     'electron/session/tests',
     'electron/engine/tests',
     'electron/sdk/tests',
-    'electron/host/tests'
+    'electron/host/tests',
+    'electron/host/ui/tests'
   ]
 } as const
 
