@@ -5,7 +5,7 @@ import { parse as parseVueSfc } from 'vue/compiler-sfc'
 import { createTextRule, type Rule } from './support.ts'
 
 /** Packages that hold the app, CLI, MCP server, and UI rather than a document format. */
-const FRONT_END_SOURCES = /^(src|packages\/(cli|mcp|vue|harness)\/src)\//u
+const FRONT_END_SOURCES = /^(src|packages\/(cli|mcp|vue|harness)\/src|electron\/(host|sdk)\/src)\//u
 
 /** Entry points that build layers from authored content without laying them out. */
 function isGraphBuilder(specifier: string, name: string): boolean {

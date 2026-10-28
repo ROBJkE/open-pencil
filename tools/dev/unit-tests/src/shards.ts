@@ -63,7 +63,13 @@ export const UNIT_TEST_GROUPS = {
     'tests/engine/scene-graph',
     'tests/engine/snap'
   ],
-  vue: ['packages/vue/tests', 'tests/engine/vue']
+  vue: ['packages/vue/tests', 'tests/engine/vue'],
+  electron: [
+    'electron/session/tests',
+    'electron/engine/tests',
+    'electron/sdk/tests',
+    'electron/host/tests'
+  ]
 } as const
 
 export type UnitTestGroup = keyof typeof UNIT_TEST_GROUPS | 'all'

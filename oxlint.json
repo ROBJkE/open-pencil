@@ -520,7 +520,7 @@
       }
     },
     {
-      "files": ["src/**/*.{ts,vue}", "packages/*/src/**/*.{ts,vue}"],
+      "files": ["src/**/*.{ts,vue}", "packages/*/src/**/*.{ts,vue}", "electron/*/src/**/*.{ts,vue}"],
       "rules": {
         "open-pencil/valibot-schema-conventions": "error"
       }

@@ -23,6 +23,17 @@ describe('graph builders in front ends', () => {
     ])
   })
 
+  test('treats the Electron shell and SDK as front ends', () => {
+    const content = "import { parsePenFile } from '@open-pencil/pen'"
+    expect(graphBuilderImports('electron/host/src/main.ts', content)).toEqual([
+      { specifier: '@open-pencil/pen', name: 'parsePenFile', line: 1 }
+    ])
+    expect(graphBuilderImports('electron/sdk/src/panel.ts', content)).toEqual([
+      { specifier: '@open-pencil/pen', name: 'parsePenFile', line: 1 }
+    ])
+    expect(graphBuilderImports('electron/engine/src/pen/codec.ts', content)).toEqual([])
+  })
+
   test('allows Core, styling helpers, types, and the format packages themselves', () => {
     expect(
       graphBuilderImports(
