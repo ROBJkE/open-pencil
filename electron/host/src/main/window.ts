@@ -6,11 +6,21 @@ import { isAllowedExternalURL } from './links'
 import { editorHTMLPath } from './paths'
 import { emptyShellURL, updateShellURL } from './shell'
 
+const DEV_SERVER_URL = 'http://127.0.0.1:4179'
+
 const WEB_PREFERENCES = {
   contextIsolation: true,
   nodeIntegration: false,
   sandbox: true
 } as const
+
+function devServer(): boolean {
+  return process.env.OPENPENCIL_DEV === '1'
+}
+
+function isDevServerURL(url: string): boolean {
+  return url === DEV_SERVER_URL || url.startsWith(`${DEV_SERVER_URL}/`)
+}
 
 function isEditorFile(url: string, shellPath: string | null): boolean {
   if (!shellPath) return false
@@ -30,7 +40,7 @@ export function installNavigationGuards(window: BrowserWindow, shellPath: string
     return { action: 'deny' }
   })
   const guard = (event: { preventDefault: () => void }, url: string) => {
-    if (isEditorFile(url, shellPath)) return
+    if (isEditorFile(url, shellPath) || isDevServerURL(url)) return
     event.preventDefault()
     if (isAllowedExternalURL(url)) void shell.openExternal(url)
   }
@@ -55,7 +65,10 @@ export function createEditorWindow(preloadPath: string): BrowserWindow {
   window.once('ready-to-show', () => {
     window.show()
   })
-  if (shellPath) void window.loadFile(shellPath)
+  if (devServer()) {
+    window.webContents.openDevTools()
+    void window.loadURL(DEV_SERVER_URL)
+  } else if (shellPath) void window.loadFile(shellPath)
   else void window.loadURL(emptyShellURL())
   return window
 }
@@ -79,6 +92,10 @@ export function createUpdateWindow(preloadPath: string): BrowserWindow {
 }
 
 export function reloadEditor(window: BrowserWindow): void {
+  if (devServer()) {
+    void window.loadURL(DEV_SERVER_URL)
+    return
+  }
   const shellPath = editorHTMLPath()
   if (shellPath) void window.loadFile(shellPath)
   else void window.loadURL(emptyShellURL())

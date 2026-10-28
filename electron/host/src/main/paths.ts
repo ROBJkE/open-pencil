@@ -23,10 +23,6 @@ export function workerPath(): string {
 }
 
 export function editorHTMLPath(): string | null {
-  const dir = entryDir()
-  const candidates = [resolve(dir, '../ui/index.html'), resolve(dir, '../../ui/index.html')]
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate
-  }
-  return null
+  const built = resolve(entryDir(), 'ui/index.html')
+  return existsSync(built) ? built : null
 }

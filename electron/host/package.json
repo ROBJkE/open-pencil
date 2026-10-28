@@ -18,7 +18,10 @@
   },
   "scripts": {
     "typecheck": "bunx vue-tsc --noEmit -p tsconfig.json",
+    "build:ui": "vite build --config ui/vite.config.ts",
     "build:electron": "bun build src/main/index.ts --outfile=dist/main.js --target=node --external electron --external electron-updater && bun build src/preload/index.ts --outfile=dist/preload.cjs --target=node --format=cjs --external electron && bun build src/preload/update.ts --outfile=dist/update-preload.cjs --target=node --format=cjs --external electron && bun build src/document/worker.ts --outfile=dist/worker.cjs --target=node --format=cjs",
+    "build:app": "bun run build:ui && bun run build:electron && electron-builder --linux AppImage --config electron-builder.yml",
+    "dev": "bun run build:electron && OPENPENCIL_DEV=1 bash -c 'vite --config ui/vite.config.ts & pid=$!; trap \"kill $pid\" EXIT INT TERM; for _ in $(seq 1 50); do curl -sf -o /dev/null http://127.0.0.1:4179 && break; sleep 0.1; done; electron dist/main.js'",
     "start": "bun run build:electron && electron dist/main.js"
   },
   "dependencies": {
