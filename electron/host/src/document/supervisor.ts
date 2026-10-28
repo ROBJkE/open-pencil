@@ -3,7 +3,9 @@ import {
   documentProcessCap,
   isMutation,
   JOB_POOL_CAP,
+  type BoundsEntry,
   type Checkpoint,
+  type FrameUpdate,
   type LayerTreeQuery,
   type LayerTreeWindow,
   type OpenDocumentSpec,
@@ -16,14 +18,18 @@ import {
   decodeBytes,
   encodeBytes,
   encodeDocumentMessage,
-  parseDocumentResult,
+  parseDocumentOutbound,
   type DocumentRequest,
-  type DocumentResult
+  type DocumentResult,
+  type DocumentTilePacket
 } from './protocol'
 import type { DocumentRuntime, DocumentRuntimeFactory } from './runtime'
 
 export interface UtilitySupervisor extends ProcessSupervisor {
   exportBytes(id: string): Promise<Uint8Array>
+  spatialIndex(id: string): Promise<BoundsEntry[]>
+  onFrame(listener: (frame: FrameUpdate) => void): () => void
+  onTile(listener: (packet: DocumentTilePacket) => void): () => void
 }
 
 export interface UtilitySupervisorOptions {
@@ -91,6 +97,8 @@ export function createUtilitySupervisor(options: UtilitySupervisorOptions): Util
   let jobSequence = 0
   const jobWaiters: Array<() => void> = []
   const activeJobs = new Set<string>()
+  const frameListeners = new Set<(frame: FrameUpdate) => void>()
+  const tileListeners = new Set<(packet: DocumentTilePacket) => void>()
 
   function emit(slot: Slot, event: SessionEvent): void {
     for (const listener of slot.listeners) listener(event)
@@ -114,11 +122,26 @@ export function createUtilitySupervisor(options: UtilitySupervisorOptions): Util
     slot.epoch += 1
     const epoch = slot.epoch
     slot.runtime = runtime
-    slot.stopMessage = runtime.onMessage((text) => {
+    slot.stopMessage = runtime.onMessage((packet) => {
       if (epoch !== slot.epoch) return
-      const parsed = parseDocumentResult(text)
+      if (packet.type === 'tile') {
+        if (packet.documentId === slot.id) {
+          for (const listener of tileListeners) listener(packet)
+        }
+        return
+      }
+      const parsed = parseDocumentOutbound(packet.text)
       if (!parsed.success) return
-      const result = parsed.output
+      const message = parsed.output
+      if (message.type === 'frame') {
+        if (message.documentId === slot.id) {
+          for (const listener of frameListeners) {
+            listener({ documentId: message.documentId, tiles: message.tiles })
+          }
+        }
+        return
+      }
+      const result = message
       if (result.checkpoint) slot.checkpoint = result.checkpoint
       const pending = slot.pending.get(result.requestId)
       if (!pending) return
@@ -329,6 +352,24 @@ export function createUtilitySupervisor(options: UtilitySupervisorOptions): Util
       if (!slot || slot.closed) return { ids: [], fields: {}, mixed: [] }
       const result = await request(slot, { type: 'selection', requestId: nextRequestId() })
       return result.ok && result.selection ? result.selection : { ids: [], fields: {}, mixed: [] }
+    },
+    async spatialIndex(id): Promise<BoundsEntry[]> {
+      const slot = slots.get(id)
+      if (!slot || slot.closed) return []
+      const result = await request(slot, { type: 'spatial', requestId: nextRequestId() })
+      return result.ok && result.spatial ? result.spatial : []
+    },
+    onFrame(listener) {
+      frameListeners.add(listener)
+      return () => {
+        frameListeners.delete(listener)
+      }
+    },
+    onTile(listener) {
+      tileListeners.add(listener)
+      return () => {
+        tileListeners.delete(listener)
+      }
     },
     async viewport(id): Promise<ViewportSummary> {
       const slot = slots.get(id)

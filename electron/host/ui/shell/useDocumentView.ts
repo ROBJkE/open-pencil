@@ -3,8 +3,6 @@ import { onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter } fro
 import type { SelectionProperties, ViewportSummary } from '@open-pencil/session'
 import { useSession } from '@open-pencil/vue-next'
 
-import { leadingPageCount } from '../session/pages'
-
 const EMPTY_SELECTION: SelectionProperties = { ids: [], fields: {}, mixed: [] }
 const EMPTY_VIEWPORT: ViewportSummary = {
   pageId: null,
@@ -17,42 +15,58 @@ const EMPTY_VIEWPORT: ViewportSummary = {
 
 /**
  * Session projections for the open document.
+ * Pages are the root list. Layers are the children of the active page.
  * Stored in shallow refs so Vue does not proxy a scene graph.
  */
 export function useDocumentView(documentId: MaybeRefOrGetter<string>) {
   const session = useSession()
   const selection = shallowRef<SelectionProperties>(EMPTY_SELECTION)
   const viewport = shallowRef<ViewportSummary>(EMPTY_VIEWPORT)
-  const total = shallowRef(0)
+  const layerTotal = shallowRef(0)
   const pageCount = shallowRef(0)
+  const ready = shallowRef(false)
   let ticket = 0
 
   async function refresh(): Promise<void> {
     const id = toValue(documentId)
     const current = ++ticket
-    const [nextSelection, nextViewport, probe] = await Promise.all([
+    if (!id) {
+      selection.value = EMPTY_SELECTION
+      viewport.value = EMPTY_VIEWPORT
+      layerTotal.value = 0
+      pageCount.value = 0
+      return
+    }
+    const [nextSelection, nextViewport, roots] = await Promise.all([
       session.selection(id),
       session.viewport(id),
       session.layerTree(id, { parentId: null, offset: 0, limit: 1 })
     ])
     if (current !== ticket) return
-    const pages = await leadingPageCount(async (offset) => {
-      const window = await session.layerTree(id, { parentId: null, offset, limit: 1 })
-      return window.rows[0]
-    }, probe.total)
+    const layers = nextViewport.pageId
+      ? await session.layerTree(id, { parentId: nextViewport.pageId, offset: 0, limit: 1 })
+      : { total: 0 }
     if (current !== ticket) return
     selection.value = nextSelection
     viewport.value = nextViewport
-    total.value = probe.total
-    pageCount.value = pages
+    pageCount.value = roots.total
+    layerTotal.value = layers.total
+    if (toValue(documentId) === id) ready.value = true
   }
 
   const stop = watch(
     () => toValue(documentId),
     (id, _previous, onCleanup) => {
-      const unsubscribe = session.subscribe(id, () => {
-        void refresh()
-      })
+      ready.value = false
+      selection.value = EMPTY_SELECTION
+      viewport.value = EMPTY_VIEWPORT
+      layerTotal.value = 0
+      pageCount.value = 0
+      const unsubscribe = id
+        ? session.subscribe(id, () => {
+            void refresh()
+          })
+        : () => undefined
       onCleanup(unsubscribe)
       void refresh()
     },
@@ -60,5 +74,5 @@ export function useDocumentView(documentId: MaybeRefOrGetter<string>) {
   )
   onScopeDispose(stop)
 
-  return { selection, viewport, total, pageCount, refresh }
+  return { selection, viewport, layerTotal, pageCount, ready, refresh }
 }

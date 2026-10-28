@@ -15,6 +15,7 @@
       "#host/*": ["./src/*"],
       "@open-pencil/electron": ["./src/index.ts"],
       "@open-pencil/engine": ["../engine/src/index.ts"],
+      "@open-pencil/engine/interaction": ["../engine/src/interaction/index.ts"],
       "@open-pencil/pen": ["../../packages/pen/src/index.ts"],
       "@open-pencil/pen/*": ["../../packages/pen/src/*"],
       "@open-pencil/session": ["../session/src/index.ts"],

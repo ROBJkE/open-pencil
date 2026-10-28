@@ -2,15 +2,16 @@ import { inject, type ComputedRef, type InjectionKey, type ShallowRef } from 'vu
 
 import type { CanvasTool, SelectionProperties, ViewportSummary } from '@open-pencil/session'
 
+import type { OpenPencilBridge } from '../session/bridge'
 import type { ShellTheme } from '../session/theme'
-
 import type { useDocumentView } from './useDocumentView'
 
 export interface DocumentView {
   selection: ShallowRef<SelectionProperties>
   viewport: ShallowRef<ViewportSummary>
-  total: ShallowRef<number>
+  layerTotal: ShallowRef<number>
   pageCount: ShallowRef<number>
+  ready: ShallowRef<boolean>
   refresh: ReturnType<typeof useDocumentView>['refresh']
 }
 
@@ -22,6 +23,8 @@ export const BUMP_KEY: InjectionKey<() => void> = Symbol('openpencil-bump')
 export interface ShellActions {
   newTab: () => void
   closeTab: () => void
+  openFile: () => void
+  saveFile: () => void
   openSettings: () => void
   undo: () => void
   redo: () => void
@@ -36,6 +39,7 @@ export interface ShellActions {
   setTool: (tool: CanvasTool) => void
 }
 
+export const WINDOW_KEY: InjectionKey<OpenPencilBridge> = Symbol('openpencil-window')
 export const ACTIONS_KEY: InjectionKey<ShellActions> = Symbol('openpencil-actions')
 export const TOOL_KEY: InjectionKey<ComputedRef<CanvasTool>> = Symbol('openpencil-tool')
 export const THEME_KEY: InjectionKey<ComputedRef<ShellTheme>> = Symbol('openpencil-theme')
@@ -62,6 +66,12 @@ export function useBump(): () => void {
   const bump = inject(BUMP_KEY)
   if (!bump) throw new Error('revision bump is required')
   return bump
+}
+
+export function useWindowBridge(): OpenPencilBridge {
+  const bridge = inject(WINDOW_KEY)
+  if (!bridge) throw new Error('window bridge is required')
+  return bridge
 }
 
 export function useShellActions(): ShellActions {

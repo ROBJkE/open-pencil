@@ -9,6 +9,7 @@ import {
   type DocumentRequest,
   type DocumentResult
 } from './protocol'
+import { createDocumentRaster, type DocumentRasterPush } from './raster'
 
 interface EngineHolder {
   engine: DocumentEngine | null
@@ -29,64 +30,92 @@ function succeeded(
  * One document engine. The utility process and the in-process test runtime
  * both drive this, so each open document has its own engine object.
  */
-export function createDocumentProcessHost() {
+export function createDocumentProcessHost(push?: DocumentRasterPush) {
   const codec = createPenCodec()
   const holder: EngineHolder = { engine: null }
+  const raster = push ? createDocumentRaster(push) : null
+
+  function current(requestId: string): DocumentEngine | DocumentResult {
+    const engine = holder.engine
+    if (!engine) return failed(requestId, 'missing-document')
+    return engine
+  }
+
+  function isEngine(value: DocumentEngine | DocumentResult): value is DocumentEngine {
+    return !('ok' in value)
+  }
+
+  function open(request: Extract<DocumentRequest, { type: 'open' }>): DocumentResult {
+    holder.engine?.dispose()
+    let bytes: Uint8Array | undefined
+    if (request.bytes !== undefined) {
+      const decoded = decodeBytes(request.bytes)
+      if (!decoded) return failed(request.requestId, 'invalid-bytes')
+      bytes = decoded
+    }
+    const engine = createDocumentEngine({ ...request.spec, bytes }, { codec })
+    holder.engine = engine
+    raster?.reset()
+    return succeeded(request.requestId, {
+      documentId: engine.id,
+      checkpoint: engine.checkpoint()
+    })
+  }
+
+  function apply(request: Extract<DocumentRequest, { type: 'apply' }>): DocumentResult {
+    const engine = current(request.requestId)
+    if (!isEngine(engine)) return engine
+    const result = engine.apply(request.command)
+    if (result.ack.accepted) raster?.schedule(engine)
+    return succeeded(request.requestId, {
+      apply: { ack: result.ack, events: result.events },
+      checkpoint: engine.checkpoint()
+    })
+  }
+
+  function withEngine(
+    requestId: string,
+    read: (engine: DocumentEngine) => DocumentResult
+  ): DocumentResult {
+    const engine = current(requestId)
+    if (!isEngine(engine)) return engine
+    return read(engine)
+  }
 
   function dispatch(request: DocumentRequest): DocumentResult {
     switch (request.type) {
-      case 'open': {
-        holder.engine?.dispose()
-        let bytes: Uint8Array | undefined
-        if (request.bytes !== undefined) {
-          const decoded = decodeBytes(request.bytes)
-          if (!decoded) return failed(request.requestId, 'invalid-bytes')
-          bytes = decoded
-        }
-        const engine = createDocumentEngine({ ...request.spec, bytes }, { codec })
-        holder.engine = engine
-        return succeeded(request.requestId, {
-          documentId: engine.id,
-          checkpoint: engine.checkpoint()
+      case 'open':
+        return open(request)
+      case 'apply':
+        return apply(request)
+      case 'layer-tree':
+        return withEngine(request.requestId, (engine) =>
+          succeeded(request.requestId, { layerTree: engine.readLayerTree(request.query) })
+        )
+      case 'selection':
+        return withEngine(request.requestId, (engine) =>
+          succeeded(request.requestId, { selection: engine.readSelection() })
+        )
+      case 'viewport':
+        return withEngine(request.requestId, (engine) =>
+          succeeded(request.requestId, { viewport: engine.readViewport() })
+        )
+      case 'restore':
+        return withEngine(request.requestId, (engine) => {
+          engine.restore(request.checkpoint)
+          raster?.schedule(engine)
+          return succeeded(request.requestId, { checkpoint: engine.checkpoint() })
         })
-      }
-      case 'apply': {
-        const engine = holder.engine
-        if (!engine) return failed(request.requestId, 'missing-document')
-        const result = engine.apply(request.command)
-        return succeeded(request.requestId, {
-          apply: { ack: result.ack, events: result.events },
-          checkpoint: engine.checkpoint()
+      case 'export':
+        return withEngine(request.requestId, (engine) => {
+          const bytes = encodeBytes(codec.write(engine.checkpoint()))
+          if (!bytes) return failed(request.requestId, 'export failed')
+          return succeeded(request.requestId, { bytes, checkpoint: engine.checkpoint() })
         })
-      }
-      case 'layer-tree': {
-        const engine = holder.engine
-        if (!engine) return failed(request.requestId, 'missing-document')
-        return succeeded(request.requestId, { layerTree: engine.readLayerTree(request.query) })
-      }
-      case 'selection': {
-        const engine = holder.engine
-        if (!engine) return failed(request.requestId, 'missing-document')
-        return succeeded(request.requestId, { selection: engine.readSelection() })
-      }
-      case 'viewport': {
-        const engine = holder.engine
-        if (!engine) return failed(request.requestId, 'missing-document')
-        return succeeded(request.requestId, { viewport: engine.readViewport() })
-      }
-      case 'restore': {
-        const engine = holder.engine
-        if (!engine) return failed(request.requestId, 'missing-document')
-        engine.restore(request.checkpoint)
-        return succeeded(request.requestId, { checkpoint: engine.checkpoint() })
-      }
-      case 'export': {
-        const engine = holder.engine
-        if (!engine) return failed(request.requestId, 'missing-document')
-        const bytes = encodeBytes(codec.write(engine.checkpoint()))
-        if (!bytes) return failed(request.requestId, 'export failed')
-        return succeeded(request.requestId, { bytes, checkpoint: engine.checkpoint() })
-      }
+      case 'spatial':
+        return withEngine(request.requestId, (engine) =>
+          succeeded(request.requestId, { spatial: engine.readSpatialIndex() })
+        )
       default:
         return failed('', 'invalid-message')
     }
@@ -113,6 +142,7 @@ export function createDocumentProcessHost() {
       }
     },
     dispose(): void {
+      raster?.dispose()
       holder.engine?.dispose()
       holder.engine = null
     }

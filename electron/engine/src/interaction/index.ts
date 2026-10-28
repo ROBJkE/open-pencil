@@ -1,3 +1,4 @@
+export { CLICK_EXTENT } from './geometry'
 export { applySpatialDelta, hitTest, hitsInRect } from './hit'
 export { snap } from './snap'
 export { toolCommands } from './tools'

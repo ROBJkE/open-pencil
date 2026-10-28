@@ -10,12 +10,11 @@ import {
 import type { LayerRow } from '@open-pencil/session'
 
 import { useMenuUI } from '../menu/menu'
-import { messages } from './messages'
 import { useShellActions } from './context'
+import { messages } from './messages'
 import VirtualRows from './VirtualRows.vue'
 
-const { pageCount, total, pageId } = defineProps<{
-  pageCount: number
+const { total, pageId } = defineProps<{
   total: number
   pageId: string | null
 }>()
@@ -37,18 +36,17 @@ function rowClass(row: LayerRow): string {
 
 <template>
   <section class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    <header data-test-id="layers-header" class="shrink-0 px-3 py-2 text-[11px] font-semibold text-surface">
+    <header
+      data-test-id="layers-header"
+      class="shrink-0 px-3 py-2 text-[11px] font-semibold text-surface"
+    >
       {{ messages.layers }}
     </header>
-    <VirtualRows
-      class="min-h-0 flex-1"
-      kind="layers"
-      :page-count="pageCount"
-      :total="total"
-      :page-id="pageId"
-    >
+    <VirtualRows class="min-h-0 flex-1" kind="layers" :total="total" :page-id="pageId">
       <template #default="{ rows }">
-        <div v-if="rows.length === 0" class="px-3 py-2 text-[11px] text-muted">{{ messages.noLayers }}</div>
+        <div v-if="rows.length === 0" class="px-3 py-2 text-[11px] text-muted">
+          {{ messages.noLayers }}
+        </div>
         <div v-else role="tree" :aria-label="messages.layers">
           <ContextMenuRoot v-for="row in rows" :key="row.id" :modal="false">
             <ContextMenuTrigger as-child>
@@ -67,7 +65,10 @@ function rowClass(row: LayerRow): string {
                   :aria-label="row.expanded ? messages.collapseLayer : messages.expandLayer"
                   @click.stop="actions.expand(row.id, !row.expanded)"
                 >
-                  <icon-lucide-chevron-right class="size-3" :class="row.expanded ? 'rotate-90' : 'rotate-0'" />
+                  <icon-lucide-chevron-right
+                    class="size-3"
+                    :class="row.expanded ? 'rotate-90' : 'rotate-0'"
+                  />
                 </button>
                 <span v-else class="w-4 shrink-0" />
                 <icon-lucide-frame v-if="row.type === 'frame'" class="size-3 shrink-0 opacity-70" />

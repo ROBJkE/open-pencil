@@ -14,9 +14,18 @@ export default defineConfig({
   base: './',
   resolve: {
     alias: {
-      '@open-pencil/session/schema': fileURLToPath(new URL('../../session/src/schema.ts', import.meta.url)),
+      '@open-pencil/engine/interaction': fileURLToPath(
+        new URL('../../engine/src/interaction/index.ts', import.meta.url)
+      ),
+      '@open-pencil/session/schema': fileURLToPath(
+        new URL('../../session/src/schema.ts', import.meta.url)
+      ),
       '@open-pencil/session': fileURLToPath(new URL('../../session/src/index.ts', import.meta.url)),
-      '@open-pencil/vue-next': fileURLToPath(new URL('../../sdk/src/index.ts', import.meta.url))
+      '@open-pencil/vue-next': fileURLToPath(new URL('../../sdk/src/index.ts', import.meta.url)),
+      '#host/main/host-events': fileURLToPath(
+        new URL('../src/main/host-events.ts', import.meta.url)
+      ),
+      '#host/wire': fileURLToPath(new URL('../src/wire.ts', import.meta.url))
     }
   },
   build: {

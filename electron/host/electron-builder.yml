@@ -12,6 +12,7 @@ files:
 asar: true
 asarUnpack:
   - dist/worker.cjs
+  - dist/canvaskit.wasm
 npmRebuild: false
 forceCodeSigning: false
 extraMetadata:

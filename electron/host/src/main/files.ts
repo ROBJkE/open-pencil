@@ -138,6 +138,13 @@ export function createDocumentFiles(host: DocumentFileHost) {
   return {
     activate,
     activeId: () => activeId,
+    list() {
+      return [...documents.values()].map((record) => ({
+        id: record.id,
+        name: record.name,
+        path: record.path
+      }))
+    },
     hasDirty: () => {
       for (const record of documents.values()) if (record.dirty) return true
       return false

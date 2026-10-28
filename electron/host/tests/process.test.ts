@@ -8,6 +8,7 @@ import { createDocumentProcessHost } from '#host/document/host'
 import { parseDocumentResult } from '#host/document/protocol'
 import { createLocalDocumentRuntime } from '#host/document/runtime'
 import { createUtilitySupervisor } from '#host/document/supervisor'
+import { parseHostEvent } from '#host/main/host-events'
 import { isAllowedExternalURL, launchTargets, parseDeepLink } from '#host/main/links'
 import { editorMenu } from '#host/main/menu-model'
 import { decideRestart } from '#host/main/restart'
@@ -34,6 +35,78 @@ describe('electron host', () => {
     expect(ack.accepted).toBe(true)
     const tree = await host.session.client.layerTree(id, { parentId: null, offset: 0, limit: 10 })
     expect(tree.rows.map((row) => row.name)).toEqual(['Frame'])
+  })
+
+  test('a spatial read and one tile round-trip through the local runtime', async () => {
+    const frames: Array<{ tiles: Array<{ id: number }> }> = []
+    const tiles: Array<{ pixels: Uint8Array; tile: { rect: { width: number; height: number } } }> =
+      []
+    const order: string[] = []
+    const supervisor = createUtilitySupervisor({
+      factory: { spawn: () => createLocalDocumentRuntime() }
+    })
+    supervisor.onFrame((update) => {
+      order.push('frame')
+      frames.push(update)
+    })
+    supervisor.onTile((packet) => {
+      order.push('tile')
+      tiles.push(packet)
+    })
+    try {
+      const id = await supervisor.open({ name: 'picture', id: 'picture' })
+      await supervisor.submit(
+        id,
+        {
+          type: 'create',
+          parentId: null,
+          index: 0,
+          node: {
+            id: 'rect',
+            type: 'rectangle',
+            fields: { name: 'Rect', x: 8, y: 8, width: 40, height: 24, fill: '#D9D9D9' }
+          }
+        },
+        'interaction'
+      )
+      await supervisor.submit(
+        id,
+        { type: 'set-viewport', zoom: 1, panX: 0, panY: 0, width: 128, height: 96 },
+        'interaction'
+      )
+      const started = Date.now()
+      while (tiles.length === 0 || frames.length === 0) {
+        if (Date.now() - started > 20000) throw new Error('timed out waiting for a tile')
+        await new Promise((resolvePromise) => {
+          setTimeout(resolvePromise, 20)
+        })
+      }
+      const spatial = await supervisor.spatialIndex(id)
+      const tile = tiles[0]
+      expect(spatial.some((entry) => entry.id === 'rect')).toBe(true)
+      expect(order.indexOf('frame')).toBeLessThan(order.indexOf('tile'))
+      expect(frames[0]?.tiles.length).toBeGreaterThan(0)
+      expect(tile).toBeDefined()
+      if (!tile) return
+      expect(tile.pixels.byteLength).toBe(tile.tile.rect.width * tile.tile.rect.height * 4)
+      expect(tile.pixels.some((channel) => channel !== 0)).toBe(true)
+    } finally {
+      await supervisor.shutdown()
+    }
+  }, 30000)
+
+  test('replays the documents already open when the window subscribes', () => {
+    expect(
+      parseHostEvent({
+        type: 'documents',
+        activeId: 'picture',
+        documents: [{ id: 'picture', name: 'picture.pen', path: '/tmp/picture.pen' }]
+      })
+    ).toEqual({
+      type: 'documents',
+      activeId: 'picture',
+      documents: [{ id: 'picture', name: 'picture.pen', path: '/tmp/picture.pen' }]
+    })
   })
 
   test('caps document processes and restarts a killed one from its checkpoint', async () => {

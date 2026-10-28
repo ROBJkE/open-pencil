@@ -1,0 +1,4 @@
+- The Electron window edits the open document.
+- Canvas clicks and the Frame tool change that document.
+- Page and layer actions update the page and layer lists.
+- Property edits, zoom, and undo keep their values until the document changes them.
