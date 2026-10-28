@@ -8,8 +8,8 @@ export interface ElectronHost {
 }
 
 /**
- * In-process host used until the Electron main process is wired.
- * The shell replaces the process supervisor; callers keep this function.
+ * In-process host. The Electron shell lives in `./main/index.ts` so this module
+ * stays free of Electron. Callers and tests keep this function.
  */
 export function createElectronHost(cpuCount = 2): ElectronHost {
   const session = createLocalSession({

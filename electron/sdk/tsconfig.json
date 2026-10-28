@@ -14,9 +14,13 @@
     "paths": {
       "#vue-next/*": ["./src/*"],
       "@open-pencil/vue-next": ["./src/index.ts"],
-      "@open-pencil/session": ["../session/src/index.ts"]
+      "@open-pencil/engine": ["../engine/src/index.ts"],
+      "@open-pencil/pen": ["../../packages/pen/src/index.ts"],
+      "@open-pencil/pen/*": ["../../packages/pen/src/*"],
+      "@open-pencil/session": ["../session/src/index.ts"],
+      "@open-pencil/session/schema": ["../session/src/schema.ts"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts", "tests/**/*.ts", "examples/**/*.ts"],
   "exclude": ["node_modules"]
 }

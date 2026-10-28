@@ -1,15 +1,8 @@
-import { inject, provide, type InjectionKey } from 'vue'
+export { SESSION_KEY, provideSession, useSession } from './session'
 
-import type { SessionClient } from '@open-pencil/session'
+export { default as CanvasFrame } from './canvas/CanvasFrame.vue'
+export { default as LayerTree } from './layer-tree/LayerTree.vue'
+export { default as PageList } from './page-list/PageList.vue'
+export { default as Properties } from './properties/Properties.vue'
 
-export const SESSION_KEY: InjectionKey<SessionClient> = Symbol('openpencil-session')
-
-export function provideSession(client: SessionClient): void {
-  provide(SESSION_KEY, client)
-}
-
-export function useSession(): SessionClient {
-  const client = inject(SESSION_KEY)
-  if (!client) throw new Error('provideSession is required before useSession')
-  return client
-}
+export type { ScreenPointer, ScreenRect } from './canvas/chrome'

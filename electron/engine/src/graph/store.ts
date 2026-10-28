@@ -60,6 +60,12 @@ function sameValue(left: JSONValue | undefined, right: JSONValue | undefined): b
   return JSON.stringify(left) === JSON.stringify(right)
 }
 
+function childSlot(nodes: readonly GraphNode[], node: GraphNode): number {
+  const parent = nodes.find((candidate) => candidate.id === node.parentId)
+  const slot = parent?.childIds.indexOf(node.id) ?? 0
+  return slot < 0 ? 0 : slot
+}
+
 export class DocumentStore implements GraphTables {
   readonly id: string
   readonly name: string
@@ -241,6 +247,36 @@ export class DocumentStore implements GraphTables {
       [{ kind: 'remove-node', id: node.id }],
       null
     )
+  }
+
+  /**
+   * Inserts `nodes` (parent before descendants) as one undo step.
+   * Roots are those whose `parentId` is the paste parent; their child lists are already filled.
+   */
+  insertFragment(parentId: string | null, index: number, nodes: readonly GraphNode[]): ApplyResult {
+    if (this.disposed) return { ack: this.fail('disposed'), events: [] }
+    if (parentId !== null && !this.nodes.has(parentId)) {
+      return { ack: this.fail('missing-parent'), events: [] }
+    }
+    if (nodes.length === 0) return { ack: this.succeed(), events: [] }
+    const seen = new Set<string>()
+    for (const node of nodes) {
+      if (this.nodes.has(node.id) || seen.has(node.id)) {
+        return { ack: this.fail('duplicate-id'), events: [] }
+      }
+      seen.add(node.id)
+    }
+    const forward: Operation[] = []
+    const removals: Operation[] = []
+    let cursor = index
+    for (const node of nodes) {
+      const at = node.parentId === parentId ? cursor : childSlot(nodes, node)
+      if (node.parentId === parentId) cursor += 1
+      forward.push({ kind: 'put-node', node: cloneNode(node), index: at })
+      removals.push({ kind: 'remove-node', id: node.id })
+      this.expanded.add(node.id)
+    }
+    return this.applyLogged(forward, removals.toReversed(), null)
   }
 
   editFields(

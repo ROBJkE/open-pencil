@@ -1,0 +1,51 @@
+# Unsigned Windows and Linux packages. macOS is not a build target.
+appId: net.dannote.open-pencil
+productName: OpenPencil
+executableName: open-pencil
+copyright: Copyright © OpenPencil contributors
+electronVersion: 45.1.0
+directories:
+  output: release
+files:
+  - dist/**
+  - package.json
+asar: true
+asarUnpack:
+  - dist/worker.cjs
+npmRebuild: false
+forceCodeSigning: false
+extraMetadata:
+  main: dist/main.js
+protocols:
+  - name: OpenPencil
+    schemes:
+      - openpencil
+fileAssociations:
+  - ext: pen
+    name: OpenPencil Document
+    description: OpenPencil document
+    role: Editor
+    mimeType: application/vnd.openpencil.pen
+publish:
+  provider: github
+  owner: ROBJkE
+  repo: open-pencil
+win:
+  target:
+    - nsis
+  signAndEditExecutable: false
+  signExecutable: false
+  verifyUpdateCodeSignature: false
+linux:
+  target:
+    - AppImage
+    - deb
+    - rpm
+  category: Graphics
+  maintainer: OpenPencil
+  synopsis: Design editor
+  description: OpenPencil design editor
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true

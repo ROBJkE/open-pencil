@@ -17,16 +17,23 @@
     }
   },
   "scripts": {
-    "typecheck": "bunx vue-tsc --noEmit -p tsconfig.json"
+    "typecheck": "bunx vue-tsc --noEmit -p tsconfig.json",
+    "build:electron": "bun build src/main/index.ts --outfile=dist/main.js --target=node --external electron --external electron-updater && bun build src/preload/index.ts --outfile=dist/preload.cjs --target=node --format=cjs --external electron && bun build src/preload/update.ts --outfile=dist/update-preload.cjs --target=node --format=cjs --external electron && bun build src/document/worker.ts --outfile=dist/worker.cjs --target=node --format=cjs",
+    "start": "bun run build:electron && electron dist/main.js"
   },
   "dependencies": {
     "@open-pencil/engine": "workspace:*",
     "@open-pencil/session": "workspace:*",
     "@open-pencil/vue-next": "workspace:*",
+    "electron-updater": "6.8.11",
+    "js-base64": "^3.9.3",
+    "valibot": "^1.5.0",
     "vue": "^3.5.43"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0",
     "typescript": "~5.8.3",
     "vue-tsc": "3.3.11"
   }

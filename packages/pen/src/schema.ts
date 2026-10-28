@@ -5,6 +5,9 @@ import * as v from 'valibot'
  * files: the object `stroke` of 2.8 and `icon_font` nodes. Properties typed `…OrVariable` hold a
  * `$name` reference in place of the value. Enumerated values stay strings so a value this reader
  * does not know falls back to the default instead of rejecting the document.
+ *
+ * Comments, shader configuration, and lint dismissals are optional. Older files omit them and still
+ * parse, and unknown keys are kept.
  */
 
 const numSchema = v.union([v.number(), v.string()])
@@ -196,6 +199,30 @@ const nodeSchema: v.GenericSchema<unknown, PenNode> = v.looseObject({
   descendants: v.optional(v.record(strSchema, overrideSchema))
 })
 
+/** A comment thread stored with the document. Extra keys are kept. */
+const penCommentSchema = v.looseObject({
+  nodeId: v.optional(strSchema),
+  body: v.optional(strSchema),
+  resolved: v.optional(v.boolean())
+})
+
+type ShaderValue = string | number | boolean | null | ShaderValue[] | { [key: string]: ShaderValue }
+
+/** Shader configuration that is not a pen paint. Any JSON value, so nested keys survive. */
+const penShaderValueSchema: v.GenericSchema<unknown, ShaderValue> = v.lazy(() =>
+  v.union([
+    v.string(),
+    v.number(),
+    v.boolean(),
+    v.null(),
+    v.array(penShaderValueSchema),
+    v.record(v.string(), penShaderValueSchema)
+  ])
+)
+
+/** A dismissed design check, or a later record that still has to round-trip. */
+const penLintDismissalSchema = v.union([v.boolean(), v.looseObject({})])
+
 const variableScalarSchema = v.union([v.string(), v.number(), v.boolean()])
 
 const variableSchema = v.looseObject({
@@ -216,10 +243,16 @@ export const penDocumentSchema = v.looseObject({
   themes: v.optional(v.record(strSchema, v.array(strSchema))),
   imports: v.optional(v.record(strSchema, strSchema)),
   variables: v.optional(v.record(strSchema, variableSchema)),
+  comments: v.optional(v.record(strSchema, penCommentSchema)),
+  shaders: v.optional(v.record(strSchema, penShaderValueSchema)),
+  lintDismissals: v.optional(v.record(strSchema, penLintDismissalSchema)),
   children: v.array(nodeSchema)
 })
 
 export type PenDocument = v.InferOutput<typeof penDocumentSchema>
+export type PenComment = v.InferOutput<typeof penCommentSchema>
+export type PenShaderValue = ShaderValue
+export type PenLintDismissal = v.InferOutput<typeof penLintDismissalSchema>
 export type PenVariable = v.InferOutput<typeof variableSchema>
 export type PenVariableScalar = v.InferOutput<typeof variableScalarSchema>
 export type PenPaint = v.InferOutput<typeof paintSchema>

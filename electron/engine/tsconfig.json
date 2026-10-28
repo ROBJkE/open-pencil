@@ -13,6 +13,8 @@
     "paths": {
       "#engine/*": ["./src/*"],
       "@open-pencil/engine": ["./src/index.ts"],
+      "@open-pencil/pen": ["../../packages/pen/src/index.ts"],
+      "@open-pencil/pen/*": ["../../packages/pen/src/*"],
       "@open-pencil/session": ["../session/src/index.ts"],
       "@open-pencil/session/schema": ["../session/src/schema.ts"]
     }

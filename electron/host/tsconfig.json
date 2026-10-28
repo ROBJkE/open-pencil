@@ -15,10 +15,13 @@
       "#host/*": ["./src/*"],
       "@open-pencil/electron": ["./src/index.ts"],
       "@open-pencil/engine": ["../engine/src/index.ts"],
+      "@open-pencil/pen": ["../../packages/pen/src/index.ts"],
+      "@open-pencil/pen/*": ["../../packages/pen/src/*"],
       "@open-pencil/session": ["../session/src/index.ts"],
+      "@open-pencil/session/schema": ["../session/src/schema.ts"],
       "@open-pencil/vue-next": ["../sdk/src/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.vue", "ui/**/*.ts", "ui/**/*.vue", "tests/**/*.ts"],
   "exclude": ["node_modules"]
 }
