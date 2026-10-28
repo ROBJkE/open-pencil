@@ -145,6 +145,22 @@ function relocate(tables: GraphTables, id: string, parentId: string | null, inde
   to.splice(Math.min(Math.max(0, index), to.length), 0, id)
 }
 
+/** `ids` plus every descendant. A parent cycle in bad data cannot hang the walk. */
+export function withDescendants(tables: GraphTables, ids: readonly string[]): string[] {
+  const seen = new Set<string>()
+  const collected: string[] = []
+  const visit = (id: string): void => {
+    if (seen.has(id)) return
+    seen.add(id)
+    collected.push(id)
+    const node = tables.nodes.get(id)
+    if (!node) return
+    for (const childId of node.childIds) visit(childId)
+  }
+  for (const id of ids) visit(id)
+  return collected
+}
+
 export function spatialEvent(
   tables: GraphTables,
   boundsFor: (node: GraphNode) => BoundsEntry | null,

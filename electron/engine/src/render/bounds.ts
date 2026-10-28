@@ -1,75 +1,11 @@
 import type { TileRect } from '@open-pencil/session'
 
+import { IDENTITY, axisAlignedBounds, placed, type Affine } from '../graph/placement'
 import type { DrawnNode, DrawnStroke } from './scene'
 
 export interface NodeStamp {
   content: string
   rect: TileRect
-}
-
-interface Affine {
-  a: number
-  b: number
-  c: number
-  d: number
-  e: number
-  f: number
-}
-
-const IDENTITY: Affine = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }
-
-function translation(x: number, y: number): Affine {
-  return { a: 1, b: 0, c: 0, d: 1, e: x, f: y }
-}
-
-function multiply(left: Affine, right: Affine): Affine {
-  return {
-    a: left.a * right.a + left.c * right.b,
-    b: left.b * right.a + left.d * right.b,
-    c: left.a * right.c + left.c * right.d,
-    d: left.b * right.c + left.d * right.d,
-    e: left.a * right.e + left.c * right.f + left.e,
-    f: left.b * right.e + left.d * right.f + left.f
-  }
-}
-
-/** Positive degrees match CanvasKit: clockwise on a y-down canvas, about the node's center. */
-function rotation(degrees: number, cx: number, cy: number): Affine {
-  const radians = (degrees * Math.PI) / 180
-  const cos = Math.cos(radians)
-  const sin = Math.sin(radians)
-  const spun: Affine = { a: cos, b: sin, c: -sin, d: cos, e: 0, f: 0 }
-  return multiply(multiply(translation(cx, cy), spun), translation(-cx, -cy))
-}
-
-function place(parent: Affine, node: DrawnNode): Affine {
-  const moved = multiply(parent, translation(node.x, node.y))
-  if (node.rotation === 0) return moved
-  return multiply(moved, rotation(node.rotation, node.width / 2, node.height / 2))
-}
-
-function apply(matrix: Affine, x: number, y: number): readonly [number, number] {
-  return [matrix.a * x + matrix.c * y + matrix.e, matrix.b * x + matrix.d * y + matrix.f]
-}
-
-function boundsOf(matrix: Affine, node: DrawnNode): TileRect {
-  const corners = [
-    apply(matrix, 0, 0),
-    apply(matrix, node.width, 0),
-    apply(matrix, node.width, node.height),
-    apply(matrix, 0, node.height)
-  ]
-  let minX = Number.POSITIVE_INFINITY
-  let minY = Number.POSITIVE_INFINITY
-  let maxX = Number.NEGATIVE_INFINITY
-  let maxY = Number.NEGATIVE_INFINITY
-  for (const [x, y] of corners) {
-    if (x < minX) minX = x
-    if (y < minY) minY = y
-    if (x > maxX) maxX = x
-    if (y > maxY) maxY = y
-  }
-  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
 }
 
 function unionRect(left: TileRect, right: TileRect): TileRect {
@@ -120,8 +56,8 @@ function contentKey(node: DrawnNode): string {
 }
 
 function walk(node: DrawnNode, matrix: Affine, into: Map<string, NodeStamp>): TileRect {
-  const local = place(matrix, node)
-  let union = boundsOf(local, node)
+  const local = placed(matrix, node)
+  let union = axisAlignedBounds(local, node.width, node.height)
   for (const child of node.children) union = unionRect(union, walk(child, local, into))
   const rect = pad(union, strokePad(node))
   into.set(node.id, { content: contentKey(node), rect })

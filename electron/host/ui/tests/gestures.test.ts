@@ -65,4 +65,35 @@ describe('canvas gestures', () => {
       }
     ])
   })
+
+  test('a move of a nested layer writes its local origin', () => {
+    const nested: BoundsEntry[] = [
+      { id: 'outer', pageId: 'page-1', x: 100, y: 100, width: 200, height: 200 },
+      {
+        id: 'inner',
+        pageId: 'page-1',
+        x: 150,
+        y: 160,
+        width: 40,
+        height: 40,
+        localX: 50,
+        localY: 60
+      }
+    ]
+    const gesture = beginGesture({
+      tool: 'select',
+      pageId: 'page-1',
+      index: 0,
+      selection: ['inner'],
+      entries: nested,
+      viewport,
+      additive: false,
+      id: 'move-1',
+      screen: { x: 160, y: 170 }
+    })
+    const dragging = { ...gesture, moved: true }
+    expect(gestureCommands(dragging, 'preview', { x: 170, y: 180 })).toEqual([
+      { type: 'preview', edits: [{ id: 'inner', fields: { x: 60, y: 70 } }] }
+    ])
+  })
 })

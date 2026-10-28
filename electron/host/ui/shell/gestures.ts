@@ -101,7 +101,7 @@ function originsFor(
   for (const id of selection) {
     const entry = byId.get(id)
     if (!entry) continue
-    origins.push({ id, x: entry.x, y: entry.y })
+    origins.push({ id, x: entry.localX ?? entry.x, y: entry.localY ?? entry.y })
   }
   return origins
 }

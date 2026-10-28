@@ -171,6 +171,25 @@ const reorderCommandSchema = v.object({
   id: v.string(),
   index: v.number()
 })
+
+/** Layer types that can take a dropped child. The panel and the document share this list. */
+export const LAYER_CONTAINER_TYPES = ['boolean', 'component', 'frame', 'group', 'section'] as const
+
+const layerContainers: ReadonlySet<string> = new Set(LAYER_CONTAINER_TYPES)
+
+export function isLayerContainer(type: string): boolean {
+  return layerContainers.has(type)
+}
+
+const layerDropPositionSchema = v.picklist(['into', 'before', 'after'])
+export type LayerDropPosition = v.InferOutput<typeof layerDropPositionSchema>
+
+const placeLayerCommandSchema = v.object({
+  type: v.literal('place-layer'),
+  id: v.string(),
+  targetId: v.string(),
+  position: layerDropPositionSchema
+})
 const deleteCommandSchema = v.object({
   type: v.literal('delete'),
   ids: v.array(v.string())
@@ -279,6 +298,7 @@ export const commandSchema = v.variant('type', [
   editCommandSchema,
   reparentCommandSchema,
   reorderCommandSchema,
+  placeLayerCommandSchema,
   deleteCommandSchema,
   groupCommandSchema,
   booleanCommandSchema,
@@ -310,6 +330,7 @@ export const MUTATING_COMMANDS = [
   'edit',
   'reparent',
   'reorder',
+  'place-layer',
   'delete',
   'group',
   'boolean',
@@ -380,7 +401,9 @@ export const boundsEntrySchema = v.object({
   x: v.number(),
   y: v.number(),
   width: v.number(),
-  height: v.number()
+  height: v.number(),
+  localX: v.optional(v.number()),
+  localY: v.optional(v.number())
 })
 export type BoundsEntry = v.InferOutput<typeof boundsEntrySchema>
 

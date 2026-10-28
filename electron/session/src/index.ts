@@ -21,6 +21,8 @@ export { createOperationLog, type OperationLog } from './log'
 export { createReplayClient, type ReplayProjection, type ReplaySession } from './replay'
 export {
   CANVAS_TOOLS,
+  LAYER_CONTAINER_TYPES,
+  isLayerContainer,
   isMutation,
   type ApplyResult,
   type BooleanOp,
@@ -38,6 +40,7 @@ export {
   type JobKind,
   type JobRequest,
   type JSONValue,
+  type LayerDropPosition,
   type LayerRow,
   type LayerTreeQuery,
   type LayerTreeWindow,

@@ -8,6 +8,7 @@ import {
   type CommandAck,
   type GraphNode,
   type JSONValue,
+  type LayerDropPosition,
   type LayerTreeQuery,
   type LayerTreeWindow,
   type NodeDraft,
@@ -28,9 +29,12 @@ import {
   isAncestor,
   spatialEvent,
   subtree,
+  withDescendants,
   type BagName,
   type GraphTables
 } from './mutate'
+import { planPlace } from './place'
+import { ancestorBoxes, placementBox, worldRect, type PlacedNode } from './placement'
 
 export interface CommandHandler {
   readonly command: Command['type']
@@ -330,6 +334,14 @@ export class DocumentStore implements GraphTables {
     return this.moveNode(id, node.parentId, index)
   }
 
+  placeLayer(id: string, targetId: string, position: LayerDropPosition): ApplyResult {
+    const plan = planPlace(this, id, targetId, position)
+    if (!plan.ok) return { ack: this.fail(plan.error), events: [] }
+    if (plan.expandId !== null) this.expanded.add(plan.expandId)
+    if (plan.forward.length === 0) return { ack: this.succeed(), events: [] }
+    return this.applyLogged(plan.forward, plan.inverse, null)
+  }
+
   removeNodes(ids: readonly string[]): ApplyResult {
     const forward: Operation[] = []
     const inverse: Operation[] = []
@@ -376,7 +388,7 @@ export class DocumentStore implements GraphTables {
     for (const id of ids) if (this.nodes.has(id)) this.selection.add(id)
     for (const id of ids) {
       const node = this.nodes.get(id)
-      if (node && node.parentId === null && this.rootIds.includes(node.id)) {
+      if (node?.parentId === null && this.rootIds.includes(node.id)) {
         this.currentPageId = node.id
         break
       }
@@ -474,7 +486,7 @@ export class DocumentStore implements GraphTables {
   }
 
   private spatial(touched: readonly string[], removed: readonly string[]): SessionEvent[] {
-    return spatialEvent(this, (node) => this.bounds(node), touched, removed)
+    return spatialEvent(this, (node) => this.bounds(node), withDescendants(this, touched), removed)
   }
 
   private mergedFields(id: string): Record<string, JSONValue> {
@@ -499,18 +511,29 @@ export class DocumentStore implements GraphTables {
     }
   }
 
+  private geometry(id: string): PlacedNode | undefined {
+    const node = this.nodes.get(id)
+    if (!node) return undefined
+    return { parentId: node.parentId, fields: this.mergedFields(id) }
+  }
+
   private bounds(node: GraphNode): BoundsEntry | null {
-    const fields = this.mergedFields(node.id)
-    const { x, y, width, height } = fields
-    if (
-      typeof x !== 'number' ||
-      typeof y !== 'number' ||
-      typeof width !== 'number' ||
-      typeof height !== 'number'
-    ) {
-      return null
+    const box = placementBox(this.mergedFields(node.id))
+    if (!box) return null
+    const world = worldRect(
+      ancestorBoxes(node.parentId, (id) => this.geometry(id)),
+      box
+    )
+    const entry: BoundsEntry = {
+      id: node.id,
+      pageId: this.pageOf(node),
+      x: world.x,
+      y: world.y,
+      width: world.width,
+      height: world.height
     }
-    return { id: node.id, pageId: this.pageOf(node), x, y, width, height }
+    if (box.x === world.x && box.y === world.y) return entry
+    return { ...entry, localX: box.x, localY: box.y }
   }
 
   private activePageId(): string | null {

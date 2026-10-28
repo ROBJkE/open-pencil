@@ -25,6 +25,10 @@ const HANDLERS: Record<Command['type'], Builtin> = {
     command.type === 'reorder'
       ? store.reorderNode(command.id, command.index)
       : unimplemented(store),
+  'place-layer': (store, command) =>
+    command.type === 'place-layer'
+      ? store.placeLayer(command.id, command.targetId, command.position)
+      : unimplemented(store),
   delete: (store, command) =>
     command.type === 'delete' ? store.removeNodes(command.ids) : unimplemented(store),
   group: (store, command) =>

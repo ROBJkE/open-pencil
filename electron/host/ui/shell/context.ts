@@ -1,6 +1,11 @@
 import { inject, type ComputedRef, type InjectionKey, type ShallowRef } from 'vue'
 
-import type { CanvasTool, SelectionProperties, ViewportSummary } from '@open-pencil/session'
+import type {
+  CanvasTool,
+  LayerDropPosition,
+  SelectionProperties,
+  ViewportSummary
+} from '@open-pencil/session'
 
 import type { OpenPencilBridge } from '../session/bridge'
 import type { ShellTheme } from '../session/theme'
@@ -34,6 +39,7 @@ export interface ShellActions {
   removeSelection: () => void
   select: (id: string) => void
   expand: (id: string, expanded: boolean) => void
+  placeLayer: (id: string, targetId: string, position: LayerDropPosition) => void
   removeNode: (id: string) => void
   addPage: () => void
   setTool: (tool: CanvasTool) => void

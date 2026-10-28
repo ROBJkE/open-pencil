@@ -214,6 +214,9 @@ const actions: ShellActions = {
   expand(id, expanded) {
     void submit({ type: 'set-expanded', id, expanded })
   },
+  placeLayer(id, targetId, position) {
+    void submit({ type: 'place-layer', id, targetId, position })
+  },
   removeNode(id) {
     void submit({ type: 'delete', ids: [id] })
   },
