@@ -9,12 +9,11 @@ import {
 
 import IconButton from '../button/IconButton.vue'
 import { useMenuUI } from '../menu/menu'
-import { messages } from './messages'
 import { useShellActions } from './context'
+import { messages } from './messages'
 import VirtualRows from './VirtualRows.vue'
 
-const { pageCount, total, pageId } = defineProps<{
-  pageCount: number
+const { total, pageId } = defineProps<{
   total: number
   pageId: string | null
 }>()
@@ -39,9 +38,11 @@ function itemClass(active: boolean): string {
         <icon-lucide-plus class="size-3.5" />
       </IconButton>
     </div>
-    <VirtualRows class="min-h-0 flex-1" kind="pages" :page-count="pageCount" :total="total" :page-id="pageId">
+    <VirtualRows class="min-h-0 flex-1" kind="pages" :total="total" :page-id="pageId">
       <template #default="{ rows }">
-        <div v-if="rows.length === 0" class="px-2 py-1 text-[11px] text-muted">{{ messages.noPages }}</div>
+        <div v-if="rows.length === 0" class="px-2 py-1 text-[11px] text-muted">
+          {{ messages.noPages }}
+        </div>
         <div v-else role="listbox" :aria-label="messages.pages" class="pb-1">
           <ContextMenuRoot v-for="row in rows" :key="row.id" :modal="false">
             <ContextMenuTrigger as-child>

@@ -5,12 +5,11 @@ import { computed, shallowRef, useTemplateRef, watch } from 'vue'
 import type { LayerRow } from '@open-pencil/session'
 import { useSession } from '@open-pencil/vue-next'
 
-import { LAYER_ROW_HEIGHT, replayTreeQuery, rowSpan } from '../session/window'
+import { LAYER_ROW_HEIGHT, treeQuery } from '../session/window'
 import { useDocumentId, useRevision } from './context'
 
-const { kind, pageCount, total, pageId } = defineProps<{
+const { kind, total, pageId } = defineProps<{
   kind: 'pages' | 'layers'
-  pageCount: number
   total: number
   pageId: string | null
 }>()
@@ -24,17 +23,13 @@ const { y } = useScroll(viewport)
 const rows = shallowRef<LayerRow[]>([])
 const placedOffset = shallowRef(0)
 
-const span = computed(() => rowSpan(kind, pageCount, total))
-const query = computed(() =>
-  replayTreeQuery(kind, pageCount, y.value, height.value, total, pageId)
-)
-const spacerHeight = computed(() => `${span.value * LAYER_ROW_HEIGHT}px`)
+const query = computed(() => treeQuery(kind, y.value, height.value, total, pageId))
+const spacerHeight = computed(() => `${Math.max(0, total) * LAYER_ROW_HEIGHT}px`)
 const rowOffset = computed(() => `translateY(${placedOffset.value * LAYER_ROW_HEIGHT}px)`)
 
 interface TreeRequest {
   id: string
   kind: 'pages' | 'layers'
-  pageCount: number
   total: number
   pageId: string | null
   parentId: string | null
@@ -47,7 +42,6 @@ function currentRequest(): TreeRequest {
   return {
     id: documentId.value,
     kind,
-    pageCount,
     total,
     pageId,
     parentId: next.parentId,
@@ -60,18 +54,12 @@ function sameRequest(left: TreeRequest, right: TreeRequest): boolean {
   return (
     left.id === right.id &&
     left.kind === right.kind &&
-    left.pageCount === right.pageCount &&
     left.total === right.total &&
     left.pageId === right.pageId &&
     left.parentId === right.parentId &&
     left.offset === right.offset &&
     left.limit === right.limit
   )
-}
-
-function visualOffset(request: TreeRequest): number {
-  const pages = Math.min(request.pageCount, request.total)
-  return request.kind === 'pages' ? request.offset : request.offset - pages
 }
 
 let running = false
@@ -87,7 +75,7 @@ async function load(): Promise<void> {
     do {
       queued = false
       const request = currentRequest()
-      if (rowSpan(request.kind, request.pageCount, request.total) <= 0) {
+      if (request.total <= 0) {
         rows.value = []
         placedOffset.value = 0
         continue
@@ -102,7 +90,7 @@ async function load(): Promise<void> {
         continue
       }
       rows.value = window.rows
-      placedOffset.value = visualOffset(request)
+      placedOffset.value = request.offset
     } while (queued)
   } finally {
     running = false
@@ -115,7 +103,6 @@ watch(
       documentId.value,
       revision.value,
       kind,
-      pageCount,
       total,
       pageId,
       query.value.offset,

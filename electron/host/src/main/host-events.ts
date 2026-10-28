@@ -19,6 +19,17 @@ const hostEventSchema = v.variant('type', [
     path: v.string()
   }),
   v.object({
+    type: v.literal('documents'),
+    activeId: v.nullable(v.string()),
+    documents: v.array(
+      v.object({
+        id: v.string(),
+        name: v.string(),
+        path: v.nullable(v.string())
+      })
+    )
+  }),
+  v.object({
     type: v.literal('menu'),
     id: v.string(),
     checked: v.optional(v.boolean())

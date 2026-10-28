@@ -1,10 +1,18 @@
 import { createDocumentProcessHost } from './host'
-import { encodeDocumentMessage, parseDocumentRequest, type DocumentResult } from './protocol'
+import {
+  encodeDocumentFrame,
+  encodeDocumentMessage,
+  parseDocumentRequest,
+  type DocumentResult,
+  type DocumentTilePacket
+} from './protocol'
+
+export type DocumentPacket = { type: 'text'; text: string } | DocumentTilePacket
 
 /** A document utility process, or a stand-in the tests can kill without a display. */
 export interface DocumentRuntime {
   send(message: string): void
-  onMessage(listener: (message: string) => void): () => void
+  onMessage(listener: (packet: DocumentPacket) => void): () => void
   onExit(listener: (code: number | null) => void): () => void
   kill(): void
 }
@@ -30,20 +38,28 @@ function failureReply(message: string): string | null {
  * process does.
  */
 export function createLocalDocumentRuntime(): DocumentRuntime {
-  const host = createDocumentProcessHost()
-  const messages = new Set<(message: string) => void>()
+  const messages = new Set<(packet: DocumentPacket) => void>()
   const exits = new Set<(code: number | null) => void>()
   let killed = false
 
-  function deliver(message: string): void {
-    for (const listener of messages) listener(message)
+  function deliver(packet: DocumentPacket): void {
+    for (const listener of messages) listener(packet)
   }
+
+  const host = createDocumentProcessHost({
+    frame(update) {
+      deliver({ type: 'text', text: encodeDocumentFrame(update) })
+    },
+    tile(packet) {
+      deliver(packet)
+    }
+  })
 
   return {
     send(message) {
       if (killed) {
         const failure = failureReply(message)
-        if (failure) deliver(failure)
+        if (failure) deliver({ type: 'text', text: failure })
         return
       }
       let replies: string[]
@@ -55,7 +71,7 @@ export function createLocalDocumentRuntime(): DocumentRuntime {
         const requestId = parsed.success ? parsed.output.requestId : ''
         replies = [encodeDocumentMessage({ type: 'result', requestId, ok: false, reason })]
       }
-      for (const reply of replies) deliver(reply)
+      for (const reply of replies) deliver({ type: 'text', text: reply })
     },
     onMessage(listener) {
       messages.add(listener)

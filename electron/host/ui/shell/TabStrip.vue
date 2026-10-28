@@ -3,7 +3,11 @@ import Tip from '../overlay/Tip.vue'
 import { messages } from './messages'
 import type { DocumentTab } from './tabs'
 
-const { tabs, activeId } = defineProps<{ tabs: DocumentTab[]; activeId: string }>()
+const { tabs, activeId, disabled } = defineProps<{
+  tabs: DocumentTab[]
+  activeId: string
+  disabled: boolean
+}>()
 
 const emit = defineEmits<{
   select: [id: string]
@@ -17,7 +21,11 @@ function itemClass(active: boolean): string {
 </script>
 
 <template>
-  <div data-test-id="tab-strip" data-slot="tab-bar" class="flex h-9 shrink-0 items-end border-b border-border bg-canvas">
+  <div
+    data-test-id="tab-strip"
+    data-slot="tab-bar"
+    class="flex h-9 shrink-0 items-end border-b border-border bg-canvas"
+  >
     <div class="scrollbar-none flex h-full min-w-0 flex-1 items-end overflow-x-auto">
       <div
         v-for="tab in tabs"
@@ -50,8 +58,9 @@ function itemClass(active: boolean): string {
     <Tip :label="messages.newTab" side="bottom">
       <button
         type="button"
-        class="mx-1 flex size-6 shrink-0 cursor-pointer items-center justify-center self-center rounded text-muted hover:bg-hover hover:text-surface focus-visible:ring-1 focus-visible:ring-panel-focus"
+        class="mx-1 flex size-6 shrink-0 cursor-pointer items-center justify-center self-center rounded text-muted hover:bg-hover hover:text-surface focus-visible:ring-1 focus-visible:ring-panel-focus disabled:cursor-default disabled:opacity-40"
         :aria-label="messages.newTab"
+        :disabled="disabled"
         @click="emit('create')"
       >
         <icon-lucide-plus class="size-4" />

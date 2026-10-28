@@ -8,6 +8,7 @@ import { createSessionClient } from '@open-pencil/session'
 
 import { forkDocumentRuntime } from '../document/fork'
 import { createUtilitySupervisor, type UtilitySupervisor } from '../document/supervisor'
+import { SESSION_FRAME, SESSION_TILE } from './channels'
 import { createDocumentFiles } from './files'
 import type { HostEvent, UpdateStatus } from './host-events'
 import { HOST_EVENT, dropSender, installIpc, sendUpdate } from './ipc'
@@ -329,6 +330,21 @@ export async function startElectronApp(): Promise<void> {
     factory: { spawn: () => forkDocumentRuntime(workerPath()) }
   })
   const documentHost = supervisor
+  documentHost.onFrame((frame) => {
+    const current = editorWindow()
+    if (!current) return
+    current.webContents.send(SESSION_FRAME, JSON.stringify(frame))
+  })
+  documentHost.onTile((packet) => {
+    const current = editorWindow()
+    if (!current) return
+    current.webContents.send(
+      SESSION_TILE,
+      packet.documentId,
+      JSON.stringify(packet.tile),
+      packet.pixels
+    )
+  })
   menu = installApplicationMenu({
     onAction: (id, checked) => {
       void runMenu(id, checked)
@@ -356,6 +372,12 @@ export async function startElectronApp(): Promise<void> {
     },
     markHostListening: () => {
       hostListening = true
+      const current = files
+      sendHost({
+        type: 'documents',
+        documents: current ? current.list() : [],
+        activeId: current?.activeId() ?? null
+      })
     },
     checkForUpdates,
     downloadUpdate,

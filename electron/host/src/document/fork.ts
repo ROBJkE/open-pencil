@@ -1,6 +1,7 @@
 import { utilityProcess } from 'electron'
 
-import type { DocumentRuntime } from './runtime'
+import { parseDocumentTile } from './protocol'
+import type { DocumentPacket, DocumentRuntime } from './runtime'
 
 function stderrText(chunk: unknown): string {
   if (typeof chunk === 'string') return chunk
@@ -14,13 +15,15 @@ export function forkDocumentRuntime(modulePath: string): DocumentRuntime {
     serviceName: 'openpencil-document',
     stdio: 'pipe'
   })
-  const messages = new Set<(message: string) => void>()
+  const messages = new Set<(packet: DocumentPacket) => void>()
   const exits = new Set<(code: number | null) => void>()
   let exited = false
 
-  child.on('message', (message) => {
-    if (typeof message !== 'string') return
-    for (const listener of messages) listener(message)
+  child.on('message', (message: unknown) => {
+    const packet: DocumentPacket | null =
+      typeof message === 'string' ? { type: 'text', text: message } : parseDocumentTile(message)
+    if (!packet) return
+    for (const listener of messages) listener(packet)
   })
   child.on('exit', (code) => {
     if (exited) return

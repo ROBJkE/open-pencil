@@ -2,11 +2,11 @@
 import { SplitterGroup, SplitterPanel, SplitterResizeHandle } from 'reka-ui'
 import { ref } from 'vue'
 
-import { messages } from './messages'
 import AppMenu from './AppMenu.vue'
-import LayerTree from './LayerTree.vue'
-import PageList from './PageList.vue'
 import { useDocumentProjection } from './context'
+import LayerTree from './LayerTree.vue'
+import { messages } from './messages'
+import PageList from './PageList.vue'
 
 const { documentName } = defineProps<{ documentName: string }>()
 
@@ -61,8 +61,13 @@ function choose(next: 'file' | 'assets'): void {
       {{ messages.noAssets }}
     </div>
     <SplitterGroup v-else direction="vertical" class="min-h-0 flex-1 overflow-hidden">
-      <SplitterPanel :default-size="30" :min-size="10" :max-size="60" class="flex flex-col overflow-hidden">
-        <PageList :page-count="view.pageCount.value" :total="view.total.value" :page-id="view.viewport.value.pageId" />
+      <SplitterPanel
+        :default-size="30"
+        :min-size="10"
+        :max-size="60"
+        class="flex flex-col overflow-hidden"
+      >
+        <PageList :total="view.pageCount.value" :page-id="view.viewport.value.pageId" />
       </SplitterPanel>
       <SplitterResizeHandle
         class="group relative z-10 -my-1 h-2 shrink-0 cursor-row-resize touch-none outline-none focus-visible:ring-1 focus-visible:ring-panel-focus"
@@ -72,7 +77,7 @@ function choose(next: 'file' | 'assets'): void {
         />
       </SplitterResizeHandle>
       <SplitterPanel :default-size="70" :min-size="20" class="flex flex-col overflow-hidden">
-        <LayerTree :page-count="view.pageCount.value" :total="view.total.value" :page-id="view.viewport.value.pageId" />
+        <LayerTree :total="view.layerTotal.value" :page-id="view.viewport.value.pageId" />
       </SplitterPanel>
     </SplitterGroup>
   </aside>

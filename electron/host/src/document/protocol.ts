@@ -1,10 +1,13 @@
 import { fromUint8Array, isValid, toUint8Array } from 'js-base64'
 import * as v from 'valibot'
 
+import { MAX_TILE_BYTES, type FrameUpdate } from '@open-pencil/session'
 import {
+  boundsEntrySchema,
   checkpointSchema,
   commandAckSchema,
   commandSchema,
+  dirtyTileSchema,
   layerTreeQuerySchema,
   layerTreeWindowSchema,
   openDocumentSpecSchema,
@@ -63,6 +66,11 @@ const exportDocumentRequestSchema = v.object({
   requestId: v.string()
 })
 
+const spatialDocumentRequestSchema = v.object({
+  type: v.literal('spatial'),
+  requestId: v.string()
+})
+
 const documentRequestSchema = v.variant('type', [
   openDocumentRequestSchema,
   applyDocumentRequestSchema,
@@ -70,7 +78,8 @@ const documentRequestSchema = v.variant('type', [
   selectionDocumentRequestSchema,
   viewportDocumentRequestSchema,
   restoreDocumentRequestSchema,
-  exportDocumentRequestSchema
+  exportDocumentRequestSchema,
+  spatialDocumentRequestSchema
 ])
 
 const documentResultSchema = v.object({
@@ -84,11 +93,37 @@ const documentResultSchema = v.object({
   selection: v.optional(selectionPropertiesSchema),
   viewport: v.optional(viewportSchema),
   checkpoint: v.optional(checkpointSchema),
-  bytes: v.optional(v.string())
+  bytes: v.optional(v.string()),
+  spatial: v.optional(v.array(boundsEntrySchema))
 })
+
+const documentFrameSchema = v.object({
+  type: v.literal('frame'),
+  documentId: v.string(),
+  tiles: v.array(dirtyTileSchema)
+})
+
+const documentOutboundSchema = v.variant('type', [documentResultSchema, documentFrameSchema])
+
+const documentTileSchema = v.pipe(
+  v.object({
+    type: v.literal('tile'),
+    documentId: v.string(),
+    tile: dirtyTileSchema,
+    pixels: v.instance(Uint8Array)
+  }),
+  v.check(
+    (packet) =>
+      packet.pixels.byteLength <= MAX_TILE_BYTES &&
+      packet.pixels.byteLength === packet.tile.rect.width * packet.tile.rect.height * 4
+  )
+)
 
 export type DocumentRequest = v.InferOutput<typeof documentRequestSchema>
 export type DocumentResult = v.InferOutput<typeof documentResultSchema>
+export type DocumentFrame = v.InferOutput<typeof documentFrameSchema>
+export type DocumentOutbound = v.InferOutput<typeof documentOutboundSchema>
+export type DocumentTilePacket = v.InferOutput<typeof documentTileSchema>
 
 export function parseDocumentRequest(text: string) {
   return v.safeParse(v.pipe(v.string(), v.parseJson(), documentRequestSchema), text)
@@ -96,6 +131,23 @@ export function parseDocumentRequest(text: string) {
 
 export function parseDocumentResult(text: string) {
   return v.safeParse(v.pipe(v.string(), v.parseJson(), documentResultSchema), text)
+}
+
+export function parseDocumentOutbound(text: string) {
+  return v.safeParse(v.pipe(v.string(), v.parseJson(), documentOutboundSchema), text)
+}
+
+export function parseDocumentTile(value: unknown): DocumentTilePacket | null {
+  const parsed = v.safeParse(documentTileSchema, value)
+  return parsed.success ? parsed.output : null
+}
+
+export function encodeDocumentFrame(frame: FrameUpdate): string {
+  return JSON.stringify({
+    type: 'frame',
+    documentId: frame.documentId,
+    tiles: frame.tiles
+  } satisfies DocumentFrame)
 }
 
 export function encodeDocumentMessage(message: DocumentRequest | DocumentResult): string {

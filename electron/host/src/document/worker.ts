@@ -1,9 +1,9 @@
 import { createDocumentProcessHost } from './host'
-import { encodeDocumentMessage } from './protocol'
+import { encodeDocumentFrame, encodeDocumentMessage } from './protocol'
 
 interface UtilityParentPort {
   on(event: 'message', listener: (event: { data: unknown }) => void): void
-  postMessage(message: string): void
+  postMessage(message: unknown): void
 }
 
 function isParentPort(value: unknown): value is UtilityParentPort {
@@ -19,7 +19,14 @@ function readParentPort(): UtilityParentPort | null {
 
 const port = readParentPort()
 if (port) {
-  const host = createDocumentProcessHost()
+  const host = createDocumentProcessHost({
+    frame(update) {
+      port.postMessage(encodeDocumentFrame(update))
+    },
+    tile(packet) {
+      port.postMessage(packet)
+    }
+  })
   port.on('message', (event) => {
     const data = event.data
     if (typeof data !== 'string') {

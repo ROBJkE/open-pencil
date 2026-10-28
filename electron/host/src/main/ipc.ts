@@ -23,11 +23,15 @@ import {
   SESSION_EVENT,
   SESSION_LAYER_TREE,
   SESSION_OPEN,
+  SESSION_OPEN_FILE,
+  SESSION_SAVE_FILE,
   SESSION_SELECTION,
+  SESSION_SPATIAL,
   SESSION_SUBMIT,
   SESSION_SUBSCRIBE,
   SESSION_UNSUBSCRIBE,
   SESSION_VIEWPORT,
+  SESSION_CAP,
   UPDATE_CHECK,
   UPDATE_CLOSE,
   UPDATE_DOWNLOAD,
@@ -138,6 +142,18 @@ export function installIpc(host: IpcHost): void {
     if (!documentId) return { pageId: null, zoom: 1, panX: 0, panY: 0, width: 0, height: 0 }
     return host.client.viewport(documentId)
   })
+
+  ipcMain.handle(SESSION_SPATIAL, async (_event, id: unknown) => {
+    const documentId = parseWire(v.string(), id)
+    if (!documentId) return []
+    return host.supervisor.spatialIndex(documentId)
+  })
+
+  ipcMain.handle(SESSION_CAP, () => host.supervisor.documentCap)
+
+  ipcMain.handle(SESSION_OPEN_FILE, () => host.files.openFromDialog())
+
+  ipcMain.handle(SESSION_SAVE_FILE, () => host.files.save())
 
   ipcMain.handle(SESSION_ACTIVATE, async (_event, id: unknown) => {
     const documentId = parseWire(v.string(), id)

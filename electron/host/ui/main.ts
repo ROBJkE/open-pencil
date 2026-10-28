@@ -1,23 +1,17 @@
 import { createApp, markRaw } from 'vue'
 
-import { createReplayClient } from '@open-pencil/session'
-
-import { demoProjection } from './session/demo'
+import { createBridgeSession } from './session/bridge'
 import { applyShellTheme } from './session/theme'
 import SessionRoot from './shell/SessionRoot.vue'
-import type { DocumentTab } from './shell/tabs'
 
 import './shell.css'
 
-const replay = createReplayClient([demoProjection()])
-const client = markRaw(replay.client)
-const tabs: DocumentTab[] = [
-  { id: 'doc-untitled', name: 'Untitled' },
-  { id: 'doc-components', name: 'Components' }
-]
+const bridge = window.openpencil
+if (!bridge) throw new Error('OpenPencil preload is missing')
 
-await client.openDocument(tabs[0] ?? { name: 'Untitled' })
-await client.openDocument(tabs[1] ?? { name: 'Components' })
+const reported = await bridge.documentCap()
+const documentCap = typeof reported === 'number' && Number.isFinite(reported) ? reported : 2
+const client = markRaw(createBridgeSession(bridge, documentCap))
 applyShellTheme('dark')
 
-createApp(SessionRoot, { client, tabs: markRaw(tabs) }).mount('#app')
+createApp(SessionRoot, { client, bridge }).mount('#app')

@@ -84,6 +84,7 @@ export class DocumentStore implements GraphTables {
   hoverId: string | null = null
   generation = 0
   private tool: Checkpoint['tool'] = 'select'
+  private currentPageId: string | null = null
   private viewport: ViewportNumbers = { zoom: 1, panX: 0, panY: 0, width: 0, height: 0 }
   private readonly log: OperationLog
   private disposed = false
@@ -170,7 +171,7 @@ export class DocumentStore implements GraphTables {
   }
 
   readViewport(): ViewportSummary {
-    return { pageId: this.rootIds[0] ?? null, ...this.viewport }
+    return { pageId: this.activePageId(), ...this.viewport }
   }
 
   readSpatialIndex(): BoundsEntry[] {
@@ -213,6 +214,8 @@ export class DocumentStore implements GraphTables {
     for (const id of checkpoint.expanded) this.expanded.add(id)
     this.hoverId = checkpoint.hoverId
     this.tool = checkpoint.tool
+    const pageId = checkpoint.viewport.pageId
+    this.currentPageId = pageId !== null && checkpoint.rootIds.includes(pageId) ? pageId : null
     this.viewport = {
       zoom: checkpoint.viewport.zoom,
       panX: checkpoint.viewport.panX,
@@ -371,6 +374,13 @@ export class DocumentStore implements GraphTables {
   select(ids: readonly string[]): ApplyResult {
     this.selection.clear()
     for (const id of ids) if (this.nodes.has(id)) this.selection.add(id)
+    for (const id of ids) {
+      const node = this.nodes.get(id)
+      if (node && node.parentId === null && this.rootIds.includes(node.id)) {
+        this.currentPageId = node.id
+        break
+      }
+    }
     return { ack: this.succeed(), events: [] }
   }
 
@@ -501,6 +511,13 @@ export class DocumentStore implements GraphTables {
       return null
     }
     return { id: node.id, pageId: this.pageOf(node), x, y, width, height }
+  }
+
+  private activePageId(): string | null {
+    if (this.currentPageId !== null && this.rootIds.includes(this.currentPageId)) {
+      return this.currentPageId
+    }
+    return this.rootIds[0] ?? null
   }
 
   private pageOf(node: GraphNode): string | null {

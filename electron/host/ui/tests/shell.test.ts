@@ -5,7 +5,7 @@ import { demoProjection, PAGE_COUNT } from '../session/demo'
 import { leadingPageCount } from '../session/pages'
 import { scrubSequence } from '../session/scrub'
 import { themeAttributes } from '../session/theme'
-import { replayTreeQuery, virtualWindow } from '../session/window'
+import { treeQuery, virtualWindow } from '../session/window'
 import { closeDocumentTab, documentSlotAvailable, nextDocument } from '../shell/tabs'
 
 describe('copied controls', () => {
@@ -29,15 +29,15 @@ describe('shell projections', () => {
     expect(virtualWindow(0, 0, 0)).toEqual({ offset: 0, limit: 1 })
   })
 
-  test('reads pages from the prefix and layers after them', () => {
-    expect(replayTreeQuery('pages', 16, 0, 240, 416, 'page-0')).toEqual({
+  test('pages and layers each start at a zero offset', () => {
+    expect(treeQuery('pages', 0, 240, 16, null)).toEqual({
       parentId: null,
       offset: 0,
       limit: 16
     })
-    expect(replayTreeQuery('layers', 16, 48, 240, 416, 'page-0')).toEqual({
-      parentId: 'page-0',
-      offset: 16,
+    expect(treeQuery('layers', 1000, 240, 400, 'page-1')).toEqual({
+      parentId: 'page-1',
+      offset: 37,
       limit: 18
     })
   })

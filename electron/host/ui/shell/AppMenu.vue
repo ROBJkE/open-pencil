@@ -14,10 +14,10 @@ import {
 
 import IconButton from '../button/IconButton.vue'
 import AppShortcutText from '../menu/AppShortcutText.vue'
-import MenuScrollArea from '../menu/MenuScrollArea.vue'
 import { useMenuUI } from '../menu/menu'
-import { messages } from './messages'
+import MenuScrollArea from '../menu/MenuScrollArea.vue'
 import { useShellActions, useShellTheme } from './context'
+import { messages } from './messages'
 
 const { documentName } = defineProps<{ documentName: string }>()
 
@@ -31,13 +31,22 @@ const subMenu = useMenuUI({ content: 'min-w-36' })
 <template>
   <div class="shrink-0 border-b border-border">
     <div class="flex items-center gap-2 px-2 py-1.5">
-      <span class="flex size-6 shrink-0 items-center justify-center rounded bg-accent text-[10px] font-semibold text-on-accent">
+      <span
+        class="flex size-6 shrink-0 items-center justify-center rounded bg-accent text-[10px] font-semibold text-on-accent"
+      >
         OP
       </span>
-      <span data-test-id="app-document-name" class="min-w-0 flex-1 truncate px-1 py-0.5 text-xs text-surface">
+      <span
+        data-test-id="app-document-name"
+        class="min-w-0 flex-1 truncate px-1 py-0.5 text-xs text-surface"
+      >
         {{ documentName }}
       </span>
-      <IconButton :label="messages.settings" data-test-id="app-settings-trigger" @click="actions.openSettings()">
+      <IconButton
+        :label="messages.settings"
+        data-test-id="app-settings-trigger"
+        @click="actions.openSettings()"
+      >
         <icon-lucide-settings class="size-3.5" />
       </IconButton>
     </div>
@@ -58,11 +67,11 @@ const subMenu = useMenuUI({ content: 'min-w-36' })
                   <AppShortcutText>Ctrl+N</AppShortcutText>
                 </MenubarItem>
                 <MenubarSeparator :class="menu.separator" />
-                <MenubarItem :class="menu.item" disabled>
+                <MenubarItem :class="menu.item" @select="actions.openFile()">
                   <span class="flex-1">{{ messages.open }}</span>
                   <AppShortcutText>Ctrl+O</AppShortcutText>
                 </MenubarItem>
-                <MenubarItem :class="menu.item" disabled>
+                <MenubarItem :class="menu.item" @select="actions.saveFile()">
                   <span class="flex-1">{{ messages.save }}</span>
                   <AppShortcutText>Ctrl+S</AppShortcutText>
                 </MenubarItem>

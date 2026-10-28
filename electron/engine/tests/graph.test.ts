@@ -155,4 +155,38 @@ describe('document engine', () => {
     expect(document.getNode('rect')?.fields.x).toBe(1)
     expect(document.checkpoint().entries).toHaveLength(1)
   })
+
+  test('selecting a later root changes the viewport page', () => {
+    const document = createDocumentEngine({ name: 'pages', id: 'pages' })
+    document.apply({
+      type: 'create',
+      parentId: null,
+      index: 0,
+      node: { id: 'page-1', type: 'page', fields: { name: 'Page 1' } }
+    })
+    document.apply({
+      type: 'create',
+      parentId: null,
+      index: 1,
+      node: { id: 'page-2', type: 'page', fields: { name: 'Page 2' } }
+    })
+    document.apply({
+      type: 'create',
+      parentId: 'page-2',
+      index: 0,
+      node: {
+        id: 'rect',
+        type: 'rectangle',
+        fields: { name: 'Rect', x: 0, y: 0, width: 10, height: 10 }
+      }
+    })
+    expect(document.readViewport().pageId).toBe('page-1')
+    document.apply({ type: 'set-selection', ids: ['page-2'] })
+    expect(document.readViewport().pageId).toBe('page-2')
+    document.apply({ type: 'set-selection', ids: ['rect'] })
+    expect(document.readViewport().pageId).toBe('page-2')
+    const restored = createDocumentEngine({ name: 'restored', id: 'restored' })
+    restored.restore(document.checkpoint())
+    expect(restored.readViewport().pageId).toBe('page-2')
+  })
 })
