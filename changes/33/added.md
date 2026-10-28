@@ -1,0 +1,1 @@
+- An Electron build opens `.pen` files in a document process separate from the Vue window, beside the existing desktop app.
