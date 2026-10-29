@@ -1,0 +1,40 @@
+{
+  "name": "@open-pencil/engine",
+  "version": "0.16.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "imports": {
+    "#engine/*": "./src/*"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./interaction": {
+      "types": "./src/interaction/index.ts",
+      "bun": "./src/interaction/index.ts",
+      "import": "./src/interaction/index.ts",
+      "default": "./src/interaction/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "bunx tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@open-pencil/pen": "workspace:*",
+    "@open-pencil/session": "workspace:*",
+    "canvaskit-wasm": "0.41.1",
+    "valibot": "^1.5.0",
+    "yjs": "13.6.32",
+    "yoga-layout": "npm:@open-pencil/yoga-layout@3.3.0-grid.3"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "~5.8.3"
+  }
+}

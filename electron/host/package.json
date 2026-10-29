@@ -1,0 +1,43 @@
+{
+  "name": "@open-pencil/electron",
+  "version": "0.16.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "imports": {
+    "#host/*": "./src/*"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "bunx vue-tsc --noEmit -p tsconfig.json",
+    "build:ui": "vite build --config ui/vite.config.ts",
+    "build:electron": "bun build src/main/index.ts --outfile=dist/main.js --target=node --external electron --external electron-updater && bun build src/preload/index.ts --outfile=dist/preload.cjs --target=node --format=cjs --external electron && bun build src/preload/update.ts --outfile=dist/update-preload.cjs --target=node --format=cjs --external electron && bun build src/document/worker.ts --outfile=dist/worker.cjs --target=node --format=cjs --external canvaskit-wasm --external yoga-layout && bun -e 'import { copyFileSync, mkdirSync } from \"node:fs\"; import { createRequire } from \"node:module\"; mkdirSync(\"dist\", { recursive: true }); copyFileSync(createRequire(import.meta.url).resolve(\"canvaskit-wasm/bin/canvaskit.wasm\"), \"dist/canvaskit.wasm\")'",
+    "build:app": "bun run build:ui && bun run build:electron && electron-builder --linux AppImage --config electron-builder.yml",
+    "dev": "bun run build:electron && OPENPENCIL_DEV=1 bash -c 'vite --config ui/vite.config.ts & pid=$!; trap \"kill $pid\" EXIT INT TERM; for _ in $(seq 1 50); do curl -sf -o /dev/null http://127.0.0.1:4179 && break; sleep 0.1; done; electron dist/main.js'",
+    "start": "bun run build:electron && electron dist/main.js"
+  },
+  "dependencies": {
+    "@open-pencil/engine": "workspace:*",
+    "@open-pencil/session": "workspace:*",
+    "@open-pencil/vue-next": "workspace:*",
+    "electron-updater": "6.8.11",
+    "js-base64": "^3.9.3",
+    "valibot": "^1.5.0",
+    "vue": "^3.5.43"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0",
+    "typescript": "~5.8.3",
+    "vue-tsc": "3.3.11"
+  }
+}

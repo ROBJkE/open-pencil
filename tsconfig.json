@@ -138,7 +138,13 @@
       ],
       "@open-pencil/pen/*": [
         "./packages/pen/src/*"
-      ]
+      ],
+      "@open-pencil/session": ["./electron/session/src/index.ts"],
+      "@open-pencil/session/schema": ["./electron/session/src/schema.ts"],
+      "@open-pencil/engine": ["./electron/engine/src/index.ts"],
+      "@open-pencil/engine/interaction": ["./electron/engine/src/interaction/index.ts"],
+      "@open-pencil/vue-next": ["./electron/sdk/src/index.ts"],
+      "@open-pencil/electron": ["./electron/host/src/index.ts"]
     }
   },
   "include": [
